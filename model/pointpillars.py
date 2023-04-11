@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from model.anchors import Anchors, anchor_target, anchors2bboxes
-import Voxelization, nms_cuda
+from ops import Voxelization, nms_cuda
 from utils import limit_period
 
 
