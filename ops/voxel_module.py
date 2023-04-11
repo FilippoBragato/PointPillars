@@ -2,7 +2,7 @@
 
 import torch
 import torch.nn as nn
-from voxel_op import hard_voxelize
+import voxel_op
 
 
 class _Voxelization(torch.autograd.Function):
@@ -51,7 +51,7 @@ class _Voxelization(torch.autograd.Function):
         coors = points.new_zeros(size=(max_voxels, 3), dtype=torch.int)
         num_points_per_voxel = points.new_zeros(
             size=(max_voxels, ), dtype=torch.int)
-        voxel_num = hard_voxelize(points, voxels, coors,
+        voxel_num = voxel_op.hard_voxelize(points, voxels, coors,
                                     num_points_per_voxel, voxel_size,
                                     coors_range, max_points, max_voxels, 3,
                                     deterministic)
