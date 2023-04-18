@@ -22,24 +22,42 @@ def save_summary(writer, loss_dict, global_step, tag, lr=None, momentum=None):
 
 def main(args):
     setup_seed()
+    data_aug = dict(object_noise=dict(
+                   num_try=100,
+                   translation_std=[0.25, 0.25, 0.25],
+                   rot_range=[-0.15707963267, 0.15707963267]
+                   ),
+               random_flip_ratio=0.5,
+               global_rot_scale_trans=dict(
+                   rot_range=[-0.78539816, 0.78539816],
+                   scale_ratio_range=[0.95, 1.05],
+                   translation_std=[0, 0, 0]
+                   ), 
+               point_range_filter=[-100.0, -100.0, -1, 100.0, 100.0, 3],
+               object_range_filter=[-100.0, -100.0, -1, 100.0, 100.0, 3]             
+           )
+
     train_dataset =  SELMADataset(root_path="../data/CV/dataset/",
                                   splits_path="./dataset/ImageSets/",
                                   split="train",
                                   split_extension="txt",
+                                  augment_data=True,
                                   sensors=['lidar', 'bbox'],
                                   sensor_positions=['T'],
                                   bbox_location="../data/corrected_bbox/",
-                                  n_min=5
+                                  n_min=5,
+                                  lidar_data_aug_config=data_aug
                                   )
     val_dataset =  SELMADataset(root_path="../data/CV/dataset/",
-                                  splits_path="./dataset/ImageSets/",
-                                  split="val",
-                                  split_extension="txt",
-                                  sensors=['lidar', 'bbox'],
-                                  sensor_positions=['T'],
-                                  bbox_location="../data/corrected_bbox/",
-                                  n_min=5
-                                  )
+                                splits_path="./dataset/ImageSets/",
+                                split="val",
+                                split_extension="txt",
+                                augment_data=False,
+                                sensors=['lidar', 'bbox'],
+                                sensor_positions=['T'],
+                                bbox_location="../data/corrected_bbox/",
+                                n_min=5
+                                )
     train_dataloader = get_dataloader(dataset=train_dataset, 
                                       batch_size=args.batch_size, 
                                       num_workers=args.num_workers,

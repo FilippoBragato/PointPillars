@@ -197,8 +197,8 @@ class SELMADataset(CityDataset):
                     out_dict['bbox'].pop(i)
                 except:
                     pass
+            out_dict = self._modify_format(out_dict)
             if self.augment_data:
-                out_dict = self._modify_format(out_dict)
                 out_dict = data_augment(out_dict, self.lidar_data_aug_config)
 
         return out_dict
