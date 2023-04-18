@@ -265,7 +265,7 @@ class SELMADataset(CityDataset):
 
     def load_lidar(self, path, xyz_shift=0., pad=False):
         data = PlyData.read(path)
-        xyz = np.array([[x,y,z] for x,y,z,_,_ in data['vertex']])+xyz_shift
+        xyz = np.array([[x,y,z] for x,y,z,_,_ in data['vertex']],dtype=np.float32)+xyz_shift
         l = np.array([l for _,_,_,_,l in data['vertex']])
         ids = np.array([l for _,_,_,l,_ in data['vertex']])
         uids, counts = np.unique(ids, return_counts=True)
