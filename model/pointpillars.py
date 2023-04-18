@@ -107,7 +107,7 @@ class PillarEncoder(nn.Module):
 
 
 class Backbone(nn.Module):
-    def __init__(self, in_channel, out_channels, layer_nums, layer_strides=[2, 2, 2], layer_padding=[1,1,1]):
+    def __init__(self, in_channel, out_channels, layer_nums, layer_strides=[2, 2, 2], layer_padding=[0,1,1]):
         super().__init__()
         assert len(out_channels) == len(layer_nums)
         assert len(out_channels) == len(layer_strides)
@@ -220,7 +220,7 @@ class PointPillars(nn.Module):
     def __init__(self,
                  nclasses=3, 
                  voxel_size=[0.16, 0.16, 4],
-                 point_cloud_range=[-16.0, -16.0, -1, 16.0, 16.0, 3] ,
+                 point_cloud_range=[-100.0, -100.0, -1, 100.0, 100.0, 3] ,
                  max_num_points=32,
                  max_voxels=(16000, 40000)):
         super().__init__()
