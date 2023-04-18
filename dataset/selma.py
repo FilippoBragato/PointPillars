@@ -218,7 +218,7 @@ class SELMADataset(CityDataset):
         for k in out_dict['lidar'].keys():
             points.append(out_dict['lidar'][k][0])
         points = np.concatenate(points, axis=0)
-        points = np.concatenate((points, np.zeros((points.shape[0],1))), axis=1)
+        points = np.concatenate((points, np.zeros((points.shape[0],1), dtype=np.float32)), axis=1)
         new_out_dict["pts"] = points
 
         # BOUNDING_BOXES
