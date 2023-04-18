@@ -115,7 +115,7 @@ class Backbone(nn.Module):
         self.multi_blocks = nn.ModuleList()
         for i in range(len(layer_strides)):
             blocks = []
-            blocks.append(nn.Conv2d(in_channel, out_channels[i], 3, stride=layer_strides[i], bias=False, padding=1))
+            blocks.append(nn.Conv2d(in_channel, out_channels[i], 3, stride=layer_strides[i], bias=False, padding=0))
             blocks.append(nn.BatchNorm2d(out_channels[i], eps=1e-3, momentum=0.01))
             blocks.append(nn.ReLU(inplace=True))
 
