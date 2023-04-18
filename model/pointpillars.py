@@ -175,6 +175,7 @@ class Neck(nn.Module):
         '''
         outs = []
         for i in range(len(self.decoder_blocks)):
+            print(x[i].shape)
             xi = self.decoder_blocks[i](x[i]) # (bs, 128, 248, 216)
             print(xi.shape)
             outs.append(xi)
