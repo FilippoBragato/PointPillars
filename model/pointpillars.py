@@ -176,6 +176,7 @@ class Neck(nn.Module):
         outs = []
         for i in range(len(self.decoder_blocks)):
             xi = self.decoder_blocks[i](x[i]) # (bs, 128, 248, 216)
+            print(xi.shape)
             outs.append(xi)
         out = torch.cat(outs, dim=1)
         return out
@@ -231,7 +232,7 @@ class PointPillars(nn.Module):
                                         max_voxels=max_voxels)
         self.pillar_encoder = PillarEncoder(voxel_size=voxel_size, 
                                             point_cloud_range=point_cloud_range, 
-                                            in_channel=9, 
+                                            in_channel=8, 
                                             out_channel=64)
         self.backbone = Backbone(in_channel=64, 
                                  out_channels=[64, 128, 256], 
