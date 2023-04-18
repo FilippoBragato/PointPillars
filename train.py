@@ -51,10 +51,10 @@ def main(args):
 
     if not args.no_cuda:
         pointpillars = PointPillars(nclasses=args.nclasses).cuda()
-        pointpillars.load_state_dict(torch.load("pretrained/summary/events.out.tfevents.1650798663.VM-1-6-ubuntu.6731.0"))
+        # pointpillars.load_state_dict(torch.load("pretrained/summary/events.out.tfevents.1650798663.VM-1-6-ubuntu.6731.0"))
     else:
         pointpillars = PointPillars(nclasses=args.nclasses)
-        pointpillars.load_state_dict(torch.load("pretrained/summary/events.out.tfevents.1650798663.VM-1-6-ubuntu.6731.0"))
+        # pointpillars.load_state_dict(torch.load("pretrained/summary/events.out.tfevents.1650798663.VM-1-6-ubuntu.6731.0"))
     loss_func = Loss()
 
     max_iters = len(train_dataloader) * args.max_epoch
