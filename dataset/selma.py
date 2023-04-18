@@ -202,7 +202,7 @@ class SELMADataset(CityDataset):
                 out_dict = self._modify_format(out_dict)
                 out_dict = data_augment(out_dict, self.lidar_data_aug_config)
 
-        return out_dict, ego_data, bbpath%(self.file_ext[sensor]), item
+        return out_dict
 
     # carla.
     # @staticmethod

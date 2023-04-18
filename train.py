@@ -22,22 +22,22 @@ def save_summary(writer, loss_dict, global_step, tag, lr=None, momentum=None):
 
 def main(args):
     setup_seed()
-    train_dataset =  SELMADataset(root_path="../PointPillars/SELMA/CV/dataset/",
+    train_dataset =  SELMADataset(root_path="../data/CV/dataset/",
                                   splits_path="./splits/selma",
                                   split="train",
                                   split_extension="txt",
                                   sensors=['lidar', 'bbox'],
                                   sensor_positions=['T'],
-                                  bbox_location="../PointPillars/SELMA/bbox_labels/",
+                                  bbox_location="../data/bbox_labels/",
                                   n_min=1
                                   )
-    val_dataset =  SELMADataset(root_path="../PointPillars/SELMA/CV/dataset/",
+    val_dataset =  SELMADataset(root_path="../data/CV/dataset/",
                                   splits_path="./splits/selma",
                                   split="val",
                                   split_extension="txt",
                                   sensors=['lidar', 'bbox'],
                                   sensor_positions=['T'],
-                                  bbox_location="../PointPillars/SELMA/bbox_labels/",
+                                  bbox_location="../data/bbox_labels/",
                                   n_min=1
                                   )
     train_dataloader = get_dataloader(dataset=train_dataset, 
