@@ -9,6 +9,7 @@ from dataset import SELMADataset, get_dataloader
 from model import PointPillars
 from loss import Loss
 from torch.utils.tensorboard import SummaryWriter
+import cProfile
 
 
 def save_summary(writer, loss_dict, global_step, tag, lr=None, momentum=None):
@@ -242,4 +243,4 @@ if __name__ == '__main__':
                         help='whether to use cuda')
     args = parser.parse_args()
 
-    main(args)
+    cProfile.run('main(args)', 'restats')
