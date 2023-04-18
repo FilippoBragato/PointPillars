@@ -23,7 +23,7 @@ def save_summary(writer, loss_dict, global_step, tag, lr=None, momentum=None):
 def main(args):
     setup_seed()
     train_dataset =  SELMADataset(root_path="../data/CV/dataset/",
-                                  splits_path="./splits/selma",
+                                  splits_path="./dataset/ImageSets/",
                                   split="train",
                                   split_extension="txt",
                                   sensors=['lidar', 'bbox'],
@@ -32,7 +32,7 @@ def main(args):
                                   n_min=5
                                   )
     val_dataset =  SELMADataset(root_path="../data/CV/dataset/",
-                                  splits_path="./splits/selma",
+                                  splits_path="./dataset/ImageSets/",
                                   split="val",
                                   split_extension="txt",
                                   sensors=['lidar', 'bbox'],
