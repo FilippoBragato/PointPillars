@@ -6,6 +6,18 @@ from utils import limit_period, iou2d_nearest
 
 class Anchors():
     def __init__(self, ranges, sizes, rotations):
+        """
+        The code defines a class with methods to generate anchors for object detection using given
+        ranges, sizes, and rotations.
+        
+        :param ranges: A list of 3D bounding box ranges for each anchor. Each range is represented as a
+        list of 6 values: [x1, y1, z1, x2, y2, z2]
+        :param sizes: The sizes parameter is a list of 3D bounding box sizes for each anchor. Each
+        element in the list is a list of three values representing the width, length, and height of the
+        bounding box
+        :param rotations: A list of rotation angles in radians that will be used to generate rotated
+        anchors
+        """
         assert len(ranges) == len(sizes)
         self.ranges = ranges
         self.sizes = sizes

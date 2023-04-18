@@ -7,81 +7,6 @@ from utils import bbox3d2bevcorners, box_collision_test, read_points, \
     remove_pts_in_bboxes, limit_period
 
 
-def dbsample(CLASSES, data_root, data_dict, db_sampler, sample_groups):
-    '''
-    CLASSES: dict(Pedestrian=0, Cyclist=1, Car=2)
-    data_root: str, data root
-    data_dict: dict(pts, gt_bboxes_3d, gt_labels, gt_names, difficulty)
-    db_infos: dict(Pedestrian, Cyclist, Car, ...)
-    return: data_dict
-    '''
-    pts, gt_bboxes_3d = data_dict['pts'], data_dict['gt_bboxes_3d']
-    gt_labels, gt_names = data_dict['gt_labels'], data_dict['gt_names']
-    gt_difficulty = data_dict['difficulty']
-    image_info, calib_info = data_dict['image_info'], data_dict['calib_info']
-
-    sampled_pts, sampled_names, sampled_labels = [], [], []
-    sampled_bboxes, sampled_difficulty = [], []
-
-    avoid_coll_boxes = copy.deepcopy(gt_bboxes_3d)
-    for name, v in sample_groups.items():
-        # 1. calculate sample numbers
-        sampled_num = v - np.sum(gt_names == name)
-        if sampled_num <= 0:
-            continue
-
-        # 2. sample databases bboxes
-        sampled_cls_list = db_sampler[name].sample(sampled_num)
-        sampled_cls_bboxes = np.array([item['box3d_lidar'] for item in sampled_cls_list], dtype=np.float32)
-
-        # 3. box_collision_test
-        avoid_coll_boxes_bv_corners = bbox3d2bevcorners(avoid_coll_boxes)
-        sampled_cls_bboxes_bv_corners = bbox3d2bevcorners(sampled_cls_bboxes)
-        coll_query_matrix = np.concatenate([avoid_coll_boxes_bv_corners, sampled_cls_bboxes_bv_corners], axis=0)
-        coll_mat = box_collision_test(coll_query_matrix, coll_query_matrix)
-        n_gt, tmp_bboxes = len(avoid_coll_boxes_bv_corners), []
-        for i in range(n_gt, len(coll_mat)):
-            if any(coll_mat[i]):
-                coll_mat[i] = False
-                coll_mat[:, i] = False
-            else:
-                cur_sample = sampled_cls_list[i - n_gt]
-                pt_path = os.path.join(data_root, cur_sample['path'])
-                sampled_pts_cur = read_points(pt_path)
-                sampled_pts_cur[:, :3] += cur_sample['box3d_lidar'][:3]
-                sampled_pts.append(sampled_pts_cur)
-                sampled_names.append(cur_sample['name'])
-                sampled_labels.append(CLASSES[cur_sample['name']])
-                sampled_bboxes.append(cur_sample['box3d_lidar'])
-                tmp_bboxes.append(cur_sample['box3d_lidar'])
-                sampled_difficulty.append(cur_sample['difficulty'])
-        if len(tmp_bboxes) == 0:
-            tmp_bboxes = np.array(tmp_bboxes).reshape(-1, 7)
-        else:
-            tmp_bboxes = np.array(tmp_bboxes)
-        avoid_coll_boxes = np.concatenate([avoid_coll_boxes, tmp_bboxes], axis=0)
-        
-    # merge sampled database
-    # remove raw points in sampled_bboxes firstly
-    pts = remove_pts_in_bboxes(pts, np.stack(sampled_bboxes, axis=0))
-    # pts = np.concatenate([pts, np.concatenate(sampled_pts, axis=0)], axis=0)
-    pts = np.concatenate([np.concatenate(sampled_pts, axis=0), pts], axis=0)
-    gt_bboxes_3d = avoid_coll_boxes.astype(np.float32)
-    gt_labels = np.concatenate([gt_labels, np.array(sampled_labels)], axis=0)
-    gt_names = np.concatenate([gt_names, np.array(sampled_names)], axis=0)
-    difficulty = np.concatenate([gt_difficulty, np.array(sampled_difficulty)], axis=0)
-    data_dict = {
-            'pts': pts,
-            'gt_bboxes_3d': gt_bboxes_3d,
-            'gt_labels': gt_labels, 
-            'gt_names': gt_names,
-            'difficulty': difficulty,
-            'image_info': image_info,
-            'calib_info': calib_info
-        }
-    return data_dict
-
-
 @numba.jit(nopython=True)
 def object_noise_core(pts, gt_bboxes_3d, bev_corners, trans_vec, rot_angle, rot_mat, masks):
     '''
@@ -145,12 +70,16 @@ def object_noise_core(pts, gt_bboxes_3d, bev_corners, trans_vec, rot_angle, rot_
 
 def object_noise(data_dict, num_try, translation_std, rot_range):
     '''
-    data_dict: dict(pts, gt_bboxes_3d, gt_labels, gt_names, difficulty)
+    data_dict: dict(pts, gt_bboxes_3d, gt_labels)
     num_try: int, 100
     translation_std: shape=[3, ]
     rot_range: shape=[2, ]
     return: data_dict
     '''
+    # The above code is a function that adds noise to the input point cloud and bounding boxes. It
+    # generates rotation vectors and matrices, and applies them to the bounding boxes. It also
+    # generates noise for each bounding box and the points inside the box. The function then updates
+    # the input dictionary with the new point cloud and bounding boxes.
     pts, gt_bboxes_3d = data_dict['pts'], data_dict['gt_bboxes_3d']
     n_bbox = len(gt_bboxes_3d)
     
@@ -181,7 +110,7 @@ def object_noise(data_dict, num_try, translation_std, rot_range):
 
 def random_flip(data_dict, random_flip_ratio):
     '''
-    data_dict: dict(pts, gt_bboxes_3d, gt_labels, gt_names, difficulty)
+    data_dict: dict(pts, gt_bboxes_3d, gt_labels)
     random_flip_ratio: float, 0-1
     return: data_dict
     '''
@@ -198,7 +127,7 @@ def random_flip(data_dict, random_flip_ratio):
 
 def global_rot_scale_trans(data_dict, rot_range, scale_ratio_range, translation_std):
     '''
-    data_dict: dict(pts, gt_bboxes_3d, gt_labels, gt_names, difficulty)
+    data_dict: dict(pts, gt_bboxes_3d, gt_labels)
     rot_range: [a, b]
     scale_ratio_range: [c, d] 
     translation_std:  [e, f, g]
@@ -214,7 +143,7 @@ def global_rot_scale_trans(data_dict, rot_range, scale_ratio_range, translation_
                         [-rot_sin, rot_cos]]) # (2, 2)
     # 1.1 bbox rotation
     gt_bboxes_3d[:, :2] = gt_bboxes_3d[:, :2] @ rot_mat.T
-    gt_bboxes_3d[:, 6] += rot_angle
+    gt_bboxes_3d[:, 6] -= rot_angle
     # 1.2 point rotation
     pts[:, :2] = pts[:, :2] @ rot_mat.T
 
@@ -234,7 +163,7 @@ def global_rot_scale_trans(data_dict, rot_range, scale_ratio_range, translation_
 
 def point_range_filter(data_dict, point_range):
     '''
-    data_dict: dict(pts, gt_bboxes_3d, gt_labels, gt_names, difficulty)
+    data_dict: dict(pts, gt_bboxes_3d, gt_labels)
     point_range: [x1, y1, z1, x2, y2, z2]
     '''
     pts = data_dict['pts']
@@ -252,11 +181,10 @@ def point_range_filter(data_dict, point_range):
 
 def object_range_filter(data_dict, object_range):
     '''
-    data_dict: dict(pts, gt_bboxes_3d, gt_labels, gt_names, difficulty)
+    data_dict: dict(pts, gt_bboxes_3d, gt_labels)
     point_range: [x1, y1, z1, x2, y2, z2]
     '''
     gt_bboxes_3d, gt_labels = data_dict['gt_bboxes_3d'], data_dict['gt_labels']
-    gt_names, difficulty = data_dict['gt_names'], data_dict['difficulty']
 
     # bev filter
     flag_x_low = gt_bboxes_3d[:, 0] > object_range[0]
@@ -266,18 +194,15 @@ def object_range_filter(data_dict, object_range):
     keep_mask = flag_x_low & flag_y_low & flag_x_high & flag_y_high
 
     gt_bboxes_3d, gt_labels = gt_bboxes_3d[keep_mask], gt_labels[keep_mask]
-    gt_names, difficulty = gt_names[keep_mask], difficulty[keep_mask]
     gt_bboxes_3d[:, 6] = limit_period(gt_bboxes_3d[:, 6], 0.5, 2 * np.pi)
     data_dict.update({'gt_bboxes_3d': gt_bboxes_3d})
     data_dict.update({'gt_labels': gt_labels})
-    data_dict.update({'gt_names': gt_names})
-    data_dict.update({'difficulty': difficulty})
     return data_dict
 
 
 def points_shuffle(data_dict):
     '''
-    data_dict: dict(pts, gt_bboxes_3d, gt_labels, gt_names, difficulty)
+    data_dict: dict(pts, gt_bboxes_3d, gt_labels)
     '''
     pts = data_dict['pts']
     indices = np.arange(0, len(pts))
@@ -289,39 +214,25 @@ def points_shuffle(data_dict):
 
 def filter_bboxes_with_labels(data_dict, label=-1):
     '''
-    data_dict: dict(pts, gt_bboxes_3d, gt_labels, gt_names, difficulty)
+    data_dict: dict(pts, gt_bboxes_3d, gt_labels)
     label: int
     '''
     gt_bboxes_3d, gt_labels = data_dict['gt_bboxes_3d'], data_dict['gt_labels']
-    gt_names, difficulty = data_dict['gt_names'], data_dict['difficulty']
     idx = gt_labels != label
     gt_bboxes_3d = gt_bboxes_3d[idx]
     gt_labels = gt_labels[idx]
-    gt_names = gt_names[idx]
-    difficulty = difficulty[idx]
     data_dict.update({'gt_bboxes_3d': gt_bboxes_3d})
     data_dict.update({'gt_labels': gt_labels})
-    data_dict.update({'gt_names': gt_names})
-    data_dict.update({'difficulty': difficulty})
     return data_dict
 
 
-def data_augment(CLASSES, data_root, data_dict, data_aug_config):
+def data_augment(data_dict, data_aug_config):
     '''
-    CLASSES: dict(Pedestrian=0, Cyclist=1, Car=2)
-    data_root: str, data root
-    data_dict: dict(pts, gt_bboxes_3d, gt_labels, gt_names, difficulty)
+    data_dict: dict(pts, gt_bboxes_3d, gt_labels)
     data_aug_config: dict()
     return: data_dict
     '''
 
-    # 1. sample databases and merge into the data 
-    db_sampler_config = data_aug_config['db_sampler']
-    data_dict = dbsample(CLASSES,
-                         data_root,
-                         data_dict, 
-                         db_sampler=db_sampler_config['db_sampler'],
-                         sample_groups=db_sampler_config['sample_groups'])
     # 2. object noise
     object_noise_config = data_aug_config['object_noise']
     data_dict = object_noise(data_dict, 
@@ -351,7 +262,7 @@ def data_augment(CLASSES, data_root, data_dict, data_aug_config):
     # 7. points shuffle
     data_dict = points_shuffle(data_dict)
 
-    # # 8. filter bboxes with label=-1
-    # data_dict = filter_bboxes_with_labels(data_dict)
+    # 8. filter bboxes with label=-1
+    data_dict = filter_bboxes_with_labels(data_dict)
     
     return data_dict

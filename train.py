@@ -5,7 +5,7 @@ from tqdm import tqdm
 import pdb
 
 from utils import setup_seed
-from dataset import Kitti, get_dataloader
+from dataset import SELMADataset, get_dataloader
 from model import PointPillars
 from loss import Loss
 from torch.utils.tensorboard import SummaryWriter
@@ -22,10 +22,24 @@ def save_summary(writer, loss_dict, global_step, tag, lr=None, momentum=None):
 
 def main(args):
     setup_seed()
-    train_dataset = Kitti(data_root=args.data_root,
-                          split='train')
-    val_dataset = Kitti(data_root=args.data_root,
-                        split='val')
+    train_dataset =  SELMADataset(root_path="../PointPillars/SELMA/CV/dataset/",
+                                  splits_path="./splits/selma",
+                                  split="train",
+                                  split_extension="txt",
+                                  sensors=['lidar', 'bbox'],
+                                  sensor_positions=['T'],
+                                  bbox_location="../PointPillars/SELMA/bbox_labels/",
+                                  n_min=1
+                                  )
+    val_dataset =  SELMADataset(root_path="../PointPillars/SELMA/CV/dataset/",
+                                  splits_path="./splits/selma",
+                                  split="val",
+                                  split_extension="txt",
+                                  sensors=['lidar', 'bbox'],
+                                  sensor_positions=['T'],
+                                  bbox_location="../PointPillars/SELMA/bbox_labels/",
+                                  n_min=1
+                                  )
     train_dataloader = get_dataloader(dataset=train_dataset, 
                                       batch_size=args.batch_size, 
                                       num_workers=args.num_workers,
@@ -37,8 +51,10 @@ def main(args):
 
     if not args.no_cuda:
         pointpillars = PointPillars(nclasses=args.nclasses).cuda()
+        pointpillars.load_state_dict(torch.load("pretrained/summary/events.out.tfevents.1650798663.VM-1-6-ubuntu.6731.0"))
     else:
         pointpillars = PointPillars(nclasses=args.nclasses)
+        pointpillars.load_state_dict(torch.load("pretrained/summary/events.out.tfevents.1650798663.VM-1-6-ubuntu.6731.0"))
     loss_func = Loss()
 
     max_iters = len(train_dataloader) * args.max_epoch
@@ -78,7 +94,6 @@ def main(args):
             batched_pts = data_dict['batched_pts']
             batched_gt_bboxes = data_dict['batched_gt_bboxes']
             batched_labels = data_dict['batched_labels']
-            batched_difficulty = data_dict['batched_difficulty']
             bbox_cls_pred, bbox_pred, bbox_dir_cls_pred, anchor_target_dict = \
                 pointpillars(batched_pts=batched_pts, 
                              mode='train',
@@ -149,7 +164,6 @@ def main(args):
                 batched_pts = data_dict['batched_pts']
                 batched_gt_bboxes = data_dict['batched_gt_bboxes']
                 batched_labels = data_dict['batched_labels']
-                batched_difficulty = data_dict['batched_difficulty']
                 bbox_cls_pred, bbox_pred, bbox_dir_cls_pred, anchor_target_dict = \
                     pointpillars(batched_pts=batched_pts, 
                                 mode='train',
