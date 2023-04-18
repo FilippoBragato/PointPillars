@@ -5,7 +5,6 @@ from plyfile import PlyData
 # import cv2 as cv
 from math import atan2
 from .cityscapes import CityDataset
-from scipy.spatial.transform import Rotation 
 from .data_aug import data_augment
 
 class SELMADataset(CityDataset):
@@ -226,15 +225,16 @@ class SELMADataset(CityDataset):
         bbs = []
         for id in bbs_ids:
             bb = out_dict['bbox'][id]
-            r =  Rotation.from_matrix(bb['rotation'])
-            angles = r.as_euler("zyx",degrees=False)
+            R = np.array(bb['rotation'])
+            beta = -np.arcsin(R[2,0])
+            gamma = np.arctan2(R[1,0]/np.cos(beta),R[0,0]/np.cos(beta))
             bb_list = [bb['location']['x'],
                        bb['location']['y'],
                        bb['location']['z'],
                        bb['extent']['x'],
                        bb['extent']['y'],
                        bb['extent']['z'],
-                       angles[0]]
+                       gamma]
             bbs.append(bb_list)
         bbs = np.array(bbs)
         new_out_dict["gt_bboxes_3d"] = bbs

@@ -3,8 +3,8 @@ import numba
 import numpy as np
 import os
 import pdb
-from utils import bbox3d2bevcorners, box_collision_test, read_points, \
-    remove_pts_in_bboxes, limit_period
+# from utils import bbox3d2bevcorners, box_collision_test, read_points, \
+#     remove_pts_in_bboxes, limit_period
 
 
 @numba.jit(nopython=True)
@@ -233,12 +233,12 @@ def data_augment(data_dict, data_aug_config):
     return: data_dict
     '''
 
-    # 2. object noise
-    object_noise_config = data_aug_config['object_noise']
-    data_dict = object_noise(data_dict, 
-                             num_try=object_noise_config['num_try'],
-                             translation_std=object_noise_config['translation_std'],
-                             rot_range=object_noise_config['rot_range'])
+    # # 2. object noise
+    # object_noise_config = data_aug_config['object_noise']
+    # data_dict = object_noise(data_dict, 
+    #                          num_try=object_noise_config['num_try'],
+    #                          translation_std=object_noise_config['translation_std'],
+    #                          rot_range=object_noise_config['rot_range'])
     
     # 3. random flip
     random_flip_ratio = data_aug_config['random_flip_ratio']
@@ -251,18 +251,18 @@ def data_augment(data_dict, data_aug_config):
     translation_std = global_rot_scale_trans_config['translation_std']
     data_dict = global_rot_scale_trans(data_dict, rot_range, scale_ratio_range, translation_std)
 
-    # 5. points range filter
-    point_range = data_aug_config['point_range_filter']
-    data_dict = point_range_filter(data_dict, point_range)
+    # # 5. points range filter
+    # point_range = data_aug_config['point_range_filter']
+    # data_dict = point_range_filter(data_dict, point_range)
 
-    # 6. object range filter
-    object_range = data_aug_config['object_range_filter']
-    data_dict = object_range_filter(data_dict, object_range)
+    # # 6. object range filter
+    # object_range = data_aug_config['object_range_filter']
+    # data_dict = object_range_filter(data_dict, object_range)
 
     # 7. points shuffle
     data_dict = points_shuffle(data_dict)
 
-    # 8. filter bboxes with label=-1
-    data_dict = filter_bboxes_with_labels(data_dict)
+    # # 8. filter bboxes with label=-1
+    # data_dict = filter_bboxes_with_labels(data_dict)
     
     return data_dict
