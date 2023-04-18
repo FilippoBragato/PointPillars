@@ -107,7 +107,7 @@ class PillarEncoder(nn.Module):
 
 
 class Backbone(nn.Module):
-    def __init__(self, in_channel, out_channels, layer_nums, layer_strides=[2, 2, 2]):
+    def __init__(self, in_channel, out_channels, layer_nums, layer_strides=[2, 2, 2], layer_padding=[0,1,1]):
         super().__init__()
         assert len(out_channels) == len(layer_nums)
         assert len(out_channels) == len(layer_strides)
@@ -115,7 +115,7 @@ class Backbone(nn.Module):
         self.multi_blocks = nn.ModuleList()
         for i in range(len(layer_strides)):
             blocks = []
-            blocks.append(nn.Conv2d(in_channel, out_channels[i], 3, stride=layer_strides[i], bias=False, padding=0))
+            blocks.append(nn.Conv2d(in_channel, out_channels[i], 3, stride=layer_strides[i], bias=False, padding=layer_padding[i]))
             blocks.append(nn.BatchNorm2d(out_channels[i], eps=1e-3, momentum=0.01))
             blocks.append(nn.ReLU(inplace=True))
 
