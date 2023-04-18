@@ -237,7 +237,7 @@ class SELMADataset(CityDataset):
                        bb['extent']['z'],
                        gamma]
             bbs.append(bb_list)
-        bbs = np.array(bbs)
+        bbs = np.array(bbs,dtype=np.float32)
         new_out_dict["gt_bboxes_3d"] = bbs
 
         # LABELS
