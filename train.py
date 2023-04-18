@@ -241,6 +241,11 @@ if __name__ == '__main__':
     parser.add_argument('--ckpt_freq_epoch', type=int, default=20)
     parser.add_argument('--no_cuda', action='store_true',
                         help='whether to use cuda')
+    parser.add_argument('--profile', action='store_true',
+                        help='whether to profile the training')
     args = parser.parse_args()
 
-    cProfile.run('main(args)', 'restats')
+    if args.profile:
+        cProfile.run('main(args)', 'restats')
+    else:
+        main(args)
