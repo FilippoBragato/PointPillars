@@ -28,8 +28,8 @@ def main(args):
                                   split_extension="txt",
                                   sensors=['lidar', 'bbox'],
                                   sensor_positions=['T'],
-                                  bbox_location="../data/bbox_labels/",
-                                  n_min=1
+                                  bbox_location="../data/corrected_bbox/",
+                                  n_min=5
                                   )
     val_dataset =  SELMADataset(root_path="../data/CV/dataset/",
                                   splits_path="./splits/selma",
@@ -37,8 +37,8 @@ def main(args):
                                   split_extension="txt",
                                   sensors=['lidar', 'bbox'],
                                   sensor_positions=['T'],
-                                  bbox_location="../data/bbox_labels/",
-                                  n_min=1
+                                  bbox_location="../data/corrected_bbox/",
+                                  n_min=5
                                   )
     train_dataloader = get_dataloader(dataset=train_dataset, 
                                       batch_size=args.batch_size, 
@@ -212,8 +212,6 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Configuration Parameters')
-    parser.add_argument('--data_root', default='/mnt/ssd1/lifa_rdata/det/kitti', 
-                        help='your data root for kitti')
     parser.add_argument('--saved_path', default='pillar_logs')
     parser.add_argument('--batch_size', type=int, default=6)
     parser.add_argument('--num_workers', type=int, default=4)
