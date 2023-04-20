@@ -1,6 +1,6 @@
 import argparse
 import pdb
-import imageio.v3 as cv2
+from PIL import Image
 import numpy as np
 import os
 from tqdm import tqdm
@@ -53,7 +53,8 @@ def create_data_info_pkl(data_root, data_type, prefix, label=True, db=False):
         calib_path = os.path.join(data_root, split, 'calib', f'{id}.txt') 
         cur_info_dict['velodyne_path'] = sep.join(lidar_path.split(sep)[-3:])
 
-        img = cv2.imread(img_path)
+        img = Image.open(img_path)
+        img = np.asarray(img)
         image_shape = img.shape[:2]
         cur_info_dict['image'] = {
             'image_shape': image_shape,
