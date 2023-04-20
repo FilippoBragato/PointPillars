@@ -315,19 +315,19 @@ def data_augment(CLASSES, data_root, data_dict, data_aug_config):
     return: data_dict
     '''
 
-    # 1. sample databases and merge into the data 
-    db_sampler_config = data_aug_config['db_sampler']
-    data_dict = dbsample(CLASSES,
-                         data_root,
-                         data_dict, 
-                         db_sampler=db_sampler_config['db_sampler'],
-                         sample_groups=db_sampler_config['sample_groups'])
-    # 2. object noise
-    object_noise_config = data_aug_config['object_noise']
-    data_dict = object_noise(data_dict, 
-                             num_try=object_noise_config['num_try'],
-                             translation_std=object_noise_config['translation_std'],
-                             rot_range=object_noise_config['rot_range'])
+    # # 1. sample databases and merge into the data 
+    # db_sampler_config = data_aug_config['db_sampler']
+    # data_dict = dbsample(CLASSES,
+    #                      data_root,
+    #                      data_dict, 
+    #                      db_sampler=db_sampler_config['db_sampler'],
+    #                      sample_groups=db_sampler_config['sample_groups'])
+    # # 2. object noise
+    # object_noise_config = data_aug_config['object_noise']
+    # data_dict = object_noise(data_dict, 
+    #                          num_try=object_noise_config['num_try'],
+    #                          translation_std=object_noise_config['translation_std'],
+    #                          rot_range=object_noise_config['rot_range'])
     
     # 3. random flip
     random_flip_ratio = data_aug_config['random_flip_ratio']
@@ -340,13 +340,13 @@ def data_augment(CLASSES, data_root, data_dict, data_aug_config):
     translation_std = global_rot_scale_trans_config['translation_std']
     data_dict = global_rot_scale_trans(data_dict, rot_range, scale_ratio_range, translation_std)
 
-    # 5. points range filter
-    point_range = data_aug_config['point_range_filter']
-    data_dict = point_range_filter(data_dict, point_range)
+    # # 5. points range filter
+    # point_range = data_aug_config['point_range_filter']
+    # data_dict = point_range_filter(data_dict, point_range)
 
-    # 6. object range filter
-    object_range = data_aug_config['object_range_filter']
-    data_dict = object_range_filter(data_dict, object_range)
+    # # 6. object range filter
+    # object_range = data_aug_config['object_range_filter']
+    # data_dict = object_range_filter(data_dict, object_range)
 
     # 7. points shuffle
     data_dict = points_shuffle(data_dict)
