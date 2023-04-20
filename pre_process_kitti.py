@@ -1,6 +1,6 @@
 import argparse
 import pdb
-import cv2
+import imageio as cv2
 import numpy as np
 import os
 from tqdm import tqdm
