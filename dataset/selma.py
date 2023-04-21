@@ -210,7 +210,7 @@ class SELMADataset(CityDataset):
     #     t = t.sum(axis=2)/(256 * 256 * 256 - 1.)
     #     return t
 
-    def _modify_format(self, out_dict, boundaries=[-39.68, 0, -1, 39.68, 69.12, 3] ):
+    def _modify_format(self, out_dict, boundaries=[0, -39.68, -1, 69.12, 39.68, 3] ):
 
         flip = random.random() < .5
 
@@ -225,7 +225,7 @@ class SELMADataset(CityDataset):
         # 1.2 point rotation
         if flip:
             points[:, :2] = -points[:, :2]
-
+        points[:, :2] = points[:, [1,0]]
         mask = points[:,0] > boundaries[0]
         mask = np.logical_and(mask, points[:,0] < boundaries[3])
         mask = np.logical_and(mask, points[:,1] > boundaries[1])
@@ -254,6 +254,7 @@ class SELMADataset(CityDataset):
                        gamma]
             bbs.append(bb_list)
         bbs = np.array(bbs,dtype=np.float32)
+        bbs[:,[0,1,3,4]] = bbs[:,[1,0,4,3]]
 
         # 1.1 bbox rotation
         if flip:
