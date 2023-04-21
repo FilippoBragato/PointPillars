@@ -213,7 +213,7 @@ class SELMADataset(CityDataset):
 
 
         # 1. rotation
-        rot_angle = np.random.uniform(0, 2*np.pi)
+        rot_angle = np.random.choice([0, np.pi])
         rot_cos, rot_sin = np.cos(rot_angle), np.sin(rot_angle)
         # in fact, - rot_angle
         rot_mat = np.array([[rot_cos, rot_sin], 
