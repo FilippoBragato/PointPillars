@@ -254,6 +254,7 @@ class SELMADataset(CityDataset):
                        gamma]
             bbs.append(bb_list)
         bbs = np.array(bbs,dtype=np.float32)
+        print("bbshape", bbs.shape)
 
         # 1.1 bbox rotation
         if flip:

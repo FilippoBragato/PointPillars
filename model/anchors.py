@@ -168,11 +168,13 @@ def anchor_target(batched_anchors, batched_gt_bboxes, batched_gt_labels, assigne
                 max_overlaps, max_overlaps_idx = torch.max(overlaps, dim=0)
             except:
                 print("err1")
+                print(gt_bboxes)
                 continue
             try:
                 gt_max_overlaps, _ = torch.max(overlaps, dim=1)
             except:
                 print("err2")
+                print(gt_bboxes)
                 continue
 
             assigned_gt_inds = -torch.ones_like(cur_anchors[:, 0], dtype=torch.long)
