@@ -105,7 +105,6 @@ class SELMADataset(CityDataset):
         wpath = path.join(self.root_path, folder, "%s%s", folder+"_"+waypoint+".%s")
         bbpath = path.join(self.bbox_path, folder, "BBOX_LABELS", folder+"_"+waypoint+".%s")
 
-        ego_data = json.load(open(path.join(self.root_path, folder, "waypoints.json"), 'r'))[waypoint]
         out_dict = {sensor:{} for sensor in self.sensors}
 
         for sensor in self.sensors:
@@ -210,7 +209,16 @@ class SELMADataset(CityDataset):
     #     t = t.sum(axis=2)/(256 * 256 * 256 - 1.)
     #     return t
 
-    def _modify_format(self, out_dict):
+    def _modify_format(self, out_dict, boundaries=[-39.68, 0, -1, 39.68, 69.12, 3] ):
+
+
+        # 1. rotation
+        rot_angle = np.random.uniform(0, 2*np.pi)
+        rot_cos, rot_sin = np.cos(rot_angle), np.sin(rot_angle)
+        # in fact, - rot_angle
+        rot_mat = np.array([[rot_cos, rot_sin], 
+                            [-rot_sin, rot_cos]]) # (2, 2)
+
         new_out_dict = dict()
         
         # POINTS:
@@ -218,7 +226,19 @@ class SELMADataset(CityDataset):
         for k in out_dict['lidar'].keys():
             points.append(out_dict['lidar'][k][0])
         points = np.concatenate(points, axis=0)
+
+        # 1.2 point rotation
+        points[:, :2] = points[:, :2] @ rot_mat.T
+
+        mask = points[:,0] > boundaries[0]
+        mask = np.logical_and(mask, points[:,0] < boundaries[3])
+        mask = np.logical_and(mask, points[:,1] > boundaries[1])
+        mask = np.logical_and(mask, points[:,1] < boundaries[4])
+        mask = np.logical_and(mask, points[:,2] > boundaries[2])
+        mask = np.logical_and(mask, points[:,2] < boundaries[5])
+        points = points[mask,:]
         # points = np.concatenate((points, np.zeros((points.shape[0],1), dtype=np.float32)), axis=1)
+
         new_out_dict["pts"] = points
 
         # BOUNDING_BOXES
@@ -238,6 +258,18 @@ class SELMADataset(CityDataset):
                        gamma]
             bbs.append(bb_list)
         bbs = np.array(bbs,dtype=np.float32)
+
+        # 1.1 bbox rotation
+        bbs[:, :2] = bbs[:, :2] @ rot_mat.T
+        bbs[:, 6] -= rot_angle
+
+        mask = bbs[:,0] > boundaries[0]
+        mask = np.logical_and(mask, bbs[:,0] < boundaries[3])
+        mask = np.logical_and(mask, bbs[:,1] > boundaries[1])
+        mask = np.logical_and(mask, bbs[:,1] < boundaries[4])
+        mask = np.logical_and(mask, bbs[:,2] > boundaries[2])
+        mask = np.logical_and(mask, bbs[:,2] < boundaries[5])
+        bbs = bbs[mask,:]
         new_out_dict["gt_bboxes_3d"] = bbs
 
         # LABELS

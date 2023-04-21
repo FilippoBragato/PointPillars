@@ -220,7 +220,7 @@ class PointPillars(nn.Module):
     def __init__(self,
                  nclasses=3, 
                  voxel_size=[0.16, 0.16, 4],
-                 point_cloud_range=[-100.0, -100.0, -1, 100.0, 100.0, 3] ,
+                 point_cloud_range=[-39.68, 0, -1, 39.68, 69.12, 3] ,
                  max_num_points=32,
                  max_voxels=(16000, 40000)):
         super().__init__()
@@ -242,9 +242,9 @@ class PointPillars(nn.Module):
         self.head = Head(in_channel=384, n_anchors=2*nclasses, n_classes=nclasses)
         
         # anchors
-        ranges = [[-100.0, -100.0, 1.4, 100.0, 100.0, 1.4],
-                    [-100.0, -100.0, 1.4, 100.0, 100.0, 1.4],
-                    [-100.0, -100.0, .22, 100.0, 100.0, .22]]
+        ranges = [[-39.68, 0, 1.4, 39.68, 69.12, 1.4],
+                    [-39.68, 0, 1.4, 39.68, 69.12, 1.4],
+                    [-39.68, 0, .22, 39.68, 69.12, .22]]
         sizes = [[0.6, 0.8, 1.73], [0.6, 1.76, 1.73], [1.6, 3.9, 1.56]]
         rotations=[0, 1.57]
         self.anchors_generator = Anchors(ranges=ranges, 
