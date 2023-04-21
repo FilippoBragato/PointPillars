@@ -226,7 +226,9 @@ def anchor_target(batched_anchors, batched_gt_bboxes, batched_gt_labels, assigne
                 multi_bbox_reg_weights.append(assigned_gt_reg_weights.reshape(d1, d2, 1, d4))
                 multi_dir_labels.append(assigned_gt_dir.reshape(d1, d2, 1, d4))
                 multi_dir_labels_weights.append(assigned_gt_dir_weights.reshape(d1, d2, 1, d4))
-            
+        else:
+            print("Oh no")
+
         multi_labels = torch.cat(multi_labels, dim=-2).reshape(-1)
         multi_label_weights = torch.cat(multi_label_weights, dim=-2).reshape(-1)
         multi_bbox_reg = torch.cat(multi_bbox_reg, dim=-3).reshape(-1, d5)
