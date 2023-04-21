@@ -225,14 +225,14 @@ class SELMADataset(CityDataset):
         # 1.2 point rotation
         if flip:
             points[:, :2] = -points[:, :2]
-        points[:, :2] = points[:, [1,0]]
-        mask = points[:,0] > boundaries[0]
-        mask = np.logical_and(mask, points[:,0] < boundaries[3])
-        mask = np.logical_and(mask, points[:,1] > boundaries[1])
-        mask = np.logical_and(mask, points[:,1] < boundaries[4])
+        mask = points[:,0] > boundaries[1]
+        mask = np.logical_and(mask, points[:,0] < boundaries[4])
+        mask = np.logical_and(mask, points[:,1] > boundaries[0])
+        mask = np.logical_and(mask, points[:,1] < boundaries[3])
         mask = np.logical_and(mask, points[:,2] > boundaries[2])
         mask = np.logical_and(mask, points[:,2] < boundaries[5])
         points = points[mask,:]
+        points[:, :2] = points[:, [1,0]]
         # points = np.concatenate((points, np.zeros((points.shape[0],1), dtype=np.float32)), axis=1)
 
         new_out_dict["pts"] = points
@@ -254,20 +254,21 @@ class SELMADataset(CityDataset):
                        gamma]
             bbs.append(bb_list)
         bbs = np.array(bbs,dtype=np.float32)
-        bbs[:,[0,1,3,4]] = bbs[:,[1,0,4,3]]
 
         # 1.1 bbox rotation
         if flip:
             bbs[:, :2] = -bbs[:, :2]
             bbs[:, 6] -= np.pi
 
-        mask = bbs[:,0] > boundaries[0]
-        mask = np.logical_and(mask, bbs[:,0] < boundaries[3])
-        mask = np.logical_and(mask, bbs[:,1] > boundaries[1])
-        mask = np.logical_and(mask, bbs[:,1] < boundaries[4])
+        mask = bbs[:,0] > boundaries[1]
+        mask = np.logical_and(mask, bbs[:,0] < boundaries[4])
+        mask = np.logical_and(mask, bbs[:,1] > boundaries[0])
+        mask = np.logical_and(mask, bbs[:,1] < boundaries[3])
         mask = np.logical_and(mask, bbs[:,2] > boundaries[2])
         mask = np.logical_and(mask, bbs[:,2] < boundaries[5])
         bbs = bbs[mask,:]
+        bbs[:,[0,1,3,4]] = bbs[:,[1,0,4,3]]
+        bbs[:,6] = -bbs[:,6]
         new_out_dict["gt_bboxes_3d"] = bbs
 
         # LABELS
