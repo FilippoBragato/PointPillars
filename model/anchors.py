@@ -158,7 +158,7 @@ def anchor_target(batched_anchors, batched_gt_bboxes, batched_gt_labels, assigne
         multi_bbox_reg, multi_bbox_reg_weights = [], []
         multi_dir_labels, multi_dir_labels_weights = [], []
         d1, d2, d3, d4, d5 = anchors.size()
-        print(gt_bboxes)
+        print(gt_bboxes.shape[0])
         if d3!= 0:
             for j in range(n_assigners): # multi anchors
                 assigner = assigners[j]
