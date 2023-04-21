@@ -6,6 +6,7 @@ from plyfile import PlyData
 from math import atan2
 from .cityscapes import CityDataset
 from .data_aug import data_augment
+import random
 
 class SELMADataset(CityDataset):
     def __init__(self,
@@ -211,13 +212,7 @@ class SELMADataset(CityDataset):
 
     def _modify_format(self, out_dict, boundaries=[-39.68, 0, -1, 39.68, 69.12, 3] ):
 
-
-        # 1. rotation
-        rot_angle = np.random.choice([0, np.pi])
-        rot_cos, rot_sin = np.cos(rot_angle), np.sin(rot_angle)
-        # in fact, - rot_angle
-        rot_mat = np.array([[rot_cos, rot_sin], 
-                            [-rot_sin, rot_cos]]) # (2, 2)
+        flip = random.random() < .5
 
         new_out_dict = dict()
         
@@ -228,7 +223,8 @@ class SELMADataset(CityDataset):
         points = np.concatenate(points, axis=0)
 
         # 1.2 point rotation
-        points[:, :2] = points[:, :2] @ rot_mat.T
+        if flip:
+            points[:, :2] = -points[:, :2]
 
         mask = points[:,0] > boundaries[0]
         mask = np.logical_and(mask, points[:,0] < boundaries[3])
@@ -260,8 +256,9 @@ class SELMADataset(CityDataset):
         bbs = np.array(bbs,dtype=np.float32)
 
         # 1.1 bbox rotation
-        bbs[:, :2] = bbs[:, :2] @ rot_mat.T
-        bbs[:, 6] -= rot_angle
+        if flip:
+            bbs[:, :2] = -bbs[:, :2]
+            bbs[:, 6] -= np.pi
 
         mask = bbs[:,0] > boundaries[0]
         mask = np.logical_and(mask, bbs[:,0] < boundaries[3])
