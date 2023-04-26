@@ -165,19 +165,8 @@ def anchor_target(batched_anchors, batched_gt_bboxes, batched_gt_labels, assigne
                 assigner['pos_iou_thr'], assigner['neg_iou_thr'], assigner['min_iou_thr']
                 cur_anchors = anchors[:, :, j, :, :].reshape(-1, 7)
                 overlaps = iou2d_nearest(gt_bboxes, cur_anchors) 
-                try:
-                    max_overlaps, max_overlaps_idx = torch.max(overlaps, dim=0)
-                except:
-                    print("err1")
-                    print(gt_bboxes)
-                    continue
-                try:
-                    gt_max_overlaps, _ = torch.max(overlaps, dim=1)
-                except:
-                    print("err2")
-                    print(gt_bboxes)
-                    continue
-
+                max_overlaps, max_overlaps_idx = torch.max(overlaps, dim=0)
+                gt_max_overlaps, _ = torch.max(overlaps, dim=1)
                 assigned_gt_inds = -torch.ones_like(cur_anchors[:, 0], dtype=torch.long)
                 # a. negative anchors
                 assigned_gt_inds[max_overlaps < neg_iou_thr] = 0
