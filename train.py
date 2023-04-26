@@ -169,7 +169,7 @@ def main(args):
                 train_step += 1
             except:
                     # printing stack trace
-                traceback.print_exc()
+                pass
         if (epoch + 1) % args.ckpt_freq_epoch == 0:
             torch.save(pointpillars.state_dict(), os.path.join(saved_ckpt_path, f'epoch_{epoch+1}.pth'))
 
