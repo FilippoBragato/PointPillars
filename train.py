@@ -10,6 +10,7 @@ from model import PointPillars
 from loss import Loss
 from torch.utils.tensorboard import SummaryWriter
 import cProfile
+import traceback
 
 
 def save_summary(writer, loss_dict, global_step, tag, lr=None, momentum=None):
@@ -113,58 +114,62 @@ def main(args):
             batched_pts = data_dict['batched_pts']
             batched_gt_bboxes = data_dict['batched_gt_bboxes']
             batched_labels = data_dict['batched_labels']
-            bbox_cls_pred, bbox_pred, bbox_dir_cls_pred, anchor_target_dict = \
-                pointpillars(batched_pts=batched_pts, 
-                             mode='train',
-                             batched_gt_bboxes=batched_gt_bboxes, 
-                             batched_gt_labels=batched_labels)
-            
-            bbox_cls_pred = bbox_cls_pred.permute(0, 2, 3, 1).reshape(-1, args.nclasses)
-            bbox_pred = bbox_pred.permute(0, 2, 3, 1).reshape(-1, 7)
-            bbox_dir_cls_pred = bbox_dir_cls_pred.permute(0, 2, 3, 1).reshape(-1, 2)
+            try:
+                bbox_cls_pred, bbox_pred, bbox_dir_cls_pred, anchor_target_dict = \
+                    pointpillars(batched_pts=batched_pts, 
+                                mode='train',
+                                batched_gt_bboxes=batched_gt_bboxes, 
+                                batched_gt_labels=batched_labels)
+                
+                bbox_cls_pred = bbox_cls_pred.permute(0, 2, 3, 1).reshape(-1, args.nclasses)
+                bbox_pred = bbox_pred.permute(0, 2, 3, 1).reshape(-1, 7)
+                bbox_dir_cls_pred = bbox_dir_cls_pred.permute(0, 2, 3, 1).reshape(-1, 2)
 
-            batched_bbox_labels = anchor_target_dict['batched_labels'].reshape(-1)
-            batched_label_weights = anchor_target_dict['batched_label_weights'].reshape(-1)
-            batched_bbox_reg = anchor_target_dict['batched_bbox_reg'].reshape(-1, 7)
-            # batched_bbox_reg_weights = anchor_target_dict['batched_bbox_reg_weights'].reshape(-1)
-            batched_dir_labels = anchor_target_dict['batched_dir_labels'].reshape(-1)
-            # batched_dir_labels_weights = anchor_target_dict['batched_dir_labels_weights'].reshape(-1)
-            
-            pos_idx = (batched_bbox_labels >= 0) & (batched_bbox_labels < args.nclasses)
-            bbox_pred = bbox_pred[pos_idx]
-            batched_bbox_reg = batched_bbox_reg[pos_idx]
-            # sin(a - b) = sin(a)*cos(b) - cos(a)*sin(b)
-            bbox_pred[:, -1] = torch.sin(bbox_pred[:, -1].clone()) * torch.cos(batched_bbox_reg[:, -1].clone())
-            batched_bbox_reg[:, -1] = torch.cos(bbox_pred[:, -1].clone()) * torch.sin(batched_bbox_reg[:, -1].clone())
-            bbox_dir_cls_pred = bbox_dir_cls_pred[pos_idx]
-            batched_dir_labels = batched_dir_labels[pos_idx]
+                batched_bbox_labels = anchor_target_dict['batched_labels'].reshape(-1)
+                batched_label_weights = anchor_target_dict['batched_label_weights'].reshape(-1)
+                batched_bbox_reg = anchor_target_dict['batched_bbox_reg'].reshape(-1, 7)
+                # batched_bbox_reg_weights = anchor_target_dict['batched_bbox_reg_weights'].reshape(-1)
+                batched_dir_labels = anchor_target_dict['batched_dir_labels'].reshape(-1)
+                # batched_dir_labels_weights = anchor_target_dict['batched_dir_labels_weights'].reshape(-1)
+                
+                pos_idx = (batched_bbox_labels >= 0) & (batched_bbox_labels < args.nclasses)
+                bbox_pred = bbox_pred[pos_idx]
+                batched_bbox_reg = batched_bbox_reg[pos_idx]
+                # sin(a - b) = sin(a)*cos(b) - cos(a)*sin(b)
+                bbox_pred[:, -1] = torch.sin(bbox_pred[:, -1].clone()) * torch.cos(batched_bbox_reg[:, -1].clone())
+                batched_bbox_reg[:, -1] = torch.cos(bbox_pred[:, -1].clone()) * torch.sin(batched_bbox_reg[:, -1].clone())
+                bbox_dir_cls_pred = bbox_dir_cls_pred[pos_idx]
+                batched_dir_labels = batched_dir_labels[pos_idx]
 
-            num_cls_pos = (batched_bbox_labels < args.nclasses).sum()
-            bbox_cls_pred = bbox_cls_pred[batched_label_weights > 0]
-            batched_bbox_labels[batched_bbox_labels < 0] = args.nclasses
-            batched_bbox_labels = batched_bbox_labels[batched_label_weights > 0]
+                num_cls_pos = (batched_bbox_labels < args.nclasses).sum()
+                bbox_cls_pred = bbox_cls_pred[batched_label_weights > 0]
+                batched_bbox_labels[batched_bbox_labels < 0] = args.nclasses
+                batched_bbox_labels = batched_bbox_labels[batched_label_weights > 0]
 
-            loss_dict = loss_func(bbox_cls_pred=bbox_cls_pred,
-                                  bbox_pred=bbox_pred,
-                                  bbox_dir_cls_pred=bbox_dir_cls_pred,
-                                  batched_labels=batched_bbox_labels, 
-                                  num_cls_pos=num_cls_pos, 
-                                  batched_bbox_reg=batched_bbox_reg, 
-                                  batched_dir_labels=batched_dir_labels)
-            
-            loss = loss_dict['total_loss']
-            loss.backward()
-            # torch.nn.utils.clip_grad_norm_(pointpillars.parameters(), max_norm=35)
-            optimizer.step()
-            scheduler.step()
+                loss_dict = loss_func(bbox_cls_pred=bbox_cls_pred,
+                                    bbox_pred=bbox_pred,
+                                    bbox_dir_cls_pred=bbox_dir_cls_pred,
+                                    batched_labels=batched_bbox_labels, 
+                                    num_cls_pos=num_cls_pos, 
+                                    batched_bbox_reg=batched_bbox_reg, 
+                                    batched_dir_labels=batched_dir_labels)
+                
+                loss = loss_dict['total_loss']
+                loss.backward()
+                # torch.nn.utils.clip_grad_norm_(pointpillars.parameters(), max_norm=35)
+                optimizer.step()
+                scheduler.step()
 
-            global_step = epoch * len(train_dataloader) + train_step + 1
+                global_step = epoch * len(train_dataloader) + train_step + 1
 
-            if global_step % args.log_freq == 0:
-                save_summary(writer, loss_dict, global_step, 'train',
-                             lr=optimizer.param_groups[0]['lr'], 
-                             momentum=optimizer.param_groups[0]['betas'][0])
-            train_step += 1
+                if global_step % args.log_freq == 0:
+                    save_summary(writer, loss_dict, global_step, 'train',
+                                lr=optimizer.param_groups[0]['lr'], 
+                                momentum=optimizer.param_groups[0]['betas'][0])
+                train_step += 1
+            except:
+                    # printing stack trace
+                traceback.print_exc()
         if (epoch + 1) % args.ckpt_freq_epoch == 0:
             torch.save(pointpillars.state_dict(), os.path.join(saved_ckpt_path, f'epoch_{epoch+1}.pth'))
 
@@ -232,13 +237,13 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Configuration Parameters')
     parser.add_argument('--saved_path', default='pillar_logs')
-    parser.add_argument('--batch_size', type=int, default=4)
-    parser.add_argument('--num_workers', type=int, default=4)
+    parser.add_argument('--batch_size', type=int, default=6)
+    parser.add_argument('--num_workers', type=int, default=16)
     parser.add_argument('--nclasses', type=int, default=3)
     parser.add_argument('--init_lr', type=float, default=0.00025)
-    parser.add_argument('--max_epoch', type=int, default=160)
-    parser.add_argument('--log_freq', type=int, default=8)
-    parser.add_argument('--ckpt_freq_epoch', type=int, default=20)
+    parser.add_argument('--max_epoch', type=int, default=60)
+    parser.add_argument('--log_freq', type=int, default=64)
+    parser.add_argument('--ckpt_freq_epoch', type=int, default=5)
     parser.add_argument('--no_cuda', action='store_true',
                         help='whether to use cuda')
     parser.add_argument('--profile', action='store_true',
