@@ -260,15 +260,19 @@ class SELMADataset(CityDataset):
             bbs[:, :2] = -bbs[:, :2]
             bbs[:, 6] -= np.pi
 
-        mask = bbs[:,0] > boundaries[1]
-        mask = np.logical_and(mask, bbs[:,0] < boundaries[4])
-        mask = np.logical_and(mask, bbs[:,1] > boundaries[0])
-        mask = np.logical_and(mask, bbs[:,1] < boundaries[3])
-        mask = np.logical_and(mask, bbs[:,2] > boundaries[2])
-        mask = np.logical_and(mask, bbs[:,2] < boundaries[5])
-        bbs = bbs[mask,:]
-        bbs[:,[0,1,3,4]] = bbs[:,[1,0,4,3]]
-        bbs[:,6] = -bbs[:,6]
+        if len(bbs.shape) == 2:
+            mask = bbs[:,0] > boundaries[1]
+            mask = np.logical_and(mask, bbs[:,0] < boundaries[4])
+            mask = np.logical_and(mask, bbs[:,1] > boundaries[0])
+            mask = np.logical_and(mask, bbs[:,1] < boundaries[3])
+            mask = np.logical_and(mask, bbs[:,2] > boundaries[2])
+            mask = np.logical_and(mask, bbs[:,2] < boundaries[5])
+            bbs = bbs[mask,:]
+            bbs[:,[0,1,3,4]] = bbs[:,[1,0,4,3]]
+            bbs[:,6] = -bbs[:,6]
+        else:
+            bbs = np.array([[]],dtype=np.float32)
+            
         new_out_dict["gt_bboxes_3d"] = bbs
 
         # LABELS
