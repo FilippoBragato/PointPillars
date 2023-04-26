@@ -256,11 +256,11 @@ class SELMADataset(CityDataset):
         bbs = np.array(bbs,dtype=np.float32)
 
         # 1.1 bbox rotation
-        if flip:
-            bbs[:, :2] = -bbs[:, :2]
-            bbs[:, 6] -= np.pi
-
         if len(bbs.shape) == 2:
+            if flip:
+                bbs[:, :2] = -bbs[:, :2]
+                bbs[:, 6] -= np.pi
+
             mask = bbs[:,0] > boundaries[1]
             mask = np.logical_and(mask, bbs[:,0] < boundaries[4])
             mask = np.logical_and(mask, bbs[:,1] > boundaries[0])
