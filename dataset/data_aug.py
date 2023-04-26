@@ -117,7 +117,7 @@ def random_flip(data_dict, random_flip_ratio):
     random_flip_state = np.random.choice([True, False], p=[random_flip_ratio, 1-random_flip_ratio])
     if random_flip_state:
         pts, gt_bboxes_3d = data_dict['pts'], data_dict['gt_bboxes_3d']
-        pts[:, 1] = -pts[:, 1] 
+        pts[:, 1] = -pts[:, 1]
         gt_bboxes_3d[:, 1] = -gt_bboxes_3d[:, 1]
         gt_bboxes_3d[:, 6] = -gt_bboxes_3d[:, 6] + np.pi
         data_dict.update({'gt_bboxes_3d': gt_bboxes_3d})

@@ -271,8 +271,8 @@ class SELMADataset(CityDataset):
             bbs[:,[0,1,3,4]] = bbs[:,[1,0,4,3]]
             bbs[:,6] = -bbs[:,6]
         else:
-            bbs = np.array([[]],dtype=np.float32)
-            
+            return self.__getitem__(random.randint(0, len(self)-1))
+
         new_out_dict["gt_bboxes_3d"] = bbs
 
         # LABELS
