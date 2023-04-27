@@ -44,7 +44,7 @@ def main(args):
     dataloader = get_dataloader(dataset=dataset, 
                                 batch_size=args.batch_size, 
                                 num_workers=args.num_workers,
-                                shuffle=True)
+                                shuffle=False)
 
     if not args.no_cuda:
         model = PointPillars(nclasses=len(CLASSES)).cuda()
