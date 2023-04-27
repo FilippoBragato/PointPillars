@@ -70,6 +70,7 @@ def main(args):
             for j, r in enumerate(batch_results):
                 temp_dict = {}
                 temp_dict["index"] = i * args.batch_size + j
+                print(r)
                 temp_dict["pred_bboxes"] = r[0]
                 temp_dict["pred_labels"] = r[1]
                 temp_dict["pred_scores"] = r[2]
