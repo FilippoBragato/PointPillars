@@ -34,7 +34,7 @@ def main(args):
                             splits_path="./dataset/ImageSets/",
                             split=args.split,
                             split_extension="txt",
-                            augment_data=True,
+                            augment_data=False,
                             sensors=['lidar', 'bbox'],
                             sensor_positions=['T'],
                             bbox_location="../data/corrected_bbox/",
