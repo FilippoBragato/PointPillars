@@ -68,12 +68,15 @@ def main(args):
             batch_results = model(batched_pts=batched_pts, 
                                   mode='test')
             for j, r in enumerate(batch_results):
-                temp_dict = {}
-                temp_dict["index"] = i * args.batch_size + j
-                temp_dict["pred_bboxes"] = r["lidar_bboxes"]
-                temp_dict["pred_labels"] = r["labels"]
-                temp_dict["pred_scores"] = r["scores"]
-                results.append(temp_dict)
+                try:
+                    temp_dict = {}
+                    temp_dict["index"] = i * args.batch_size + j
+                    temp_dict["pred_bboxes"] = r["lidar_bboxes"]
+                    temp_dict["pred_labels"] = r["labels"]
+                    temp_dict["pred_scores"] = r["scores"]
+                    results.append(temp_dict)
+                except:
+                    print(r)
 
     base_name = args.ckpt.split('/')[-1].split('.')[0]
     # write results to file as a json format
