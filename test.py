@@ -58,6 +58,12 @@ def main(args):
     results = []
     for i, data_dict in enumerate(tqdm(dataloader)):
         with torch.no_grad():
+            if not args.no_cuda:
+                # move the tensors to the cuda
+                for key in data_dict:
+                    for j, item in enumerate(data_dict[key]):
+                        if torch.is_tensor(item):
+                            data_dict[key][j] = data_dict[key][j].cuda()
             batched_pts = data_dict["batched_pts"]
             batch_results = model(batched_pts=batched_pts, 
                                   mode='test')
