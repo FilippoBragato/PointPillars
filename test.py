@@ -39,13 +39,12 @@ def main(args):
                             sensor_positions=['T'],
                             bbox_location="../data/corrected_bbox/",
                             n_min=5,
-                            format_flip=False
+                            format_flip=args.flip,
                             )
     dataloader = get_dataloader(dataset=dataset, 
                                 batch_size=args.batch_size, 
                                 num_workers=args.num_workers,
                                 shuffle=True)
-    pcd_limit_range = np.array([0, -40, -3, 70.4, 40, 0.0], dtype=np.float32)
 
     if not args.no_cuda:
         model = PointPillars(nclasses=len(CLASSES)).cuda()
@@ -72,16 +71,16 @@ def main(args):
                 try:
                     temp_dict = {}
                     temp_dict["index"] = i * args.batch_size + j
-                    temp_dict["pred_bboxes"] = r["lidar_bboxes"]
-                    temp_dict["pred_labels"] = r["labels"]
-                    temp_dict["pred_scores"] = r["scores"]
+                    temp_dict["pred_bboxes"] = r["lidar_bboxes"].tolist()
+                    temp_dict["pred_labels"] = r["labels"].tolist()
+                    temp_dict["pred_scores"] = r["scores"].tolist()
                     results.append(temp_dict)
                 except:
                     print(r)
 
     base_name = args.ckpt.split('/')[-1].split('.')[0]
     # write results to file as a json format
-    with open(f'./results/{base_name}_{args.split}.txt', 'w') as f:
+    with open(f'./results/{base_name}_{args.split}_{str(args.flip)}.txt', 'w') as f:
         f.write("[\n")
         for result in results:
             f.write(str(result))
@@ -98,9 +97,12 @@ if __name__ == '__main__':
     parser.add_argument('--ckpt', default='', help='your checkpoint for kitti')
     parser.add_argument('--no_cuda', action='store_true',
                         help='whether to use cuda')
+    parser.add_argument('--flip', action='store_true',
+                        help='whether to flip')
     parser.add_argument('--split', default='val', help='the split you want to analize')
     parser.add_argument('--batch_size', type=int, default=6)
     parser.add_argument('--num_workers', type=int, default=16)
+    
     args = parser.parse_args()
 
     main(args)
