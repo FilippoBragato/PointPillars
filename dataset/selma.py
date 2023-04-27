@@ -20,6 +20,7 @@ class SELMADataset(CityDataset):
                  bbox_location=None,
                  n_min=5, # minimum number of points related to a bounding box to consider it valid
                  lidar_data_aug_config=dict(),
+                 format_flip=None,
                  **kwargs): # whether to use city19 or city36 class set
 
         super(SELMADataset, self).__init__(split_extension=split_extension, #TODO
@@ -87,6 +88,8 @@ class SELMADataset(CityDataset):
         self.n_min = n_min
 
         self.lidar_data_aug_config = lidar_data_aug_config
+        
+        self.format_flip = format_flip
 
     def init_ids(self):
         self.raw_to_train = {-1:-1, 0:-1, 1:2, 2:4, 3:-1, 4:-1, 5:5, 6:0, 7:0, 8:1, 9:8, 10:-1,
@@ -211,8 +214,10 @@ class SELMADataset(CityDataset):
     #     return t
 
     def _modify_format(self, out_dict, boundaries=[0, -39.68, -1, 69.12, 39.68, 3] ):
-
-        flip = random.random() < .5
+        if self.format_flip is None:
+            flip = random.random() < .5
+        else:
+            flip = self.format_flip
 
         new_out_dict = dict()
         

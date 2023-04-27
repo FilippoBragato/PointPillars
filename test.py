@@ -39,6 +39,7 @@ def main(args):
                             sensor_positions=['T'],
                             bbox_location="../data/corrected_bbox/",
                             n_min=5,
+                            format_flip=False
                             )
     dataloader = get_dataloader(dataset=dataset, 
                                 batch_size=args.batch_size, 
