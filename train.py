@@ -35,8 +35,8 @@ def main(args):
                    scale_ratio_range=[0.95, 1.05],
                    translation_std=[0, 0, 0]
                    ), 
-               point_range_filter=[-39.68, 0, -1, 39.68, 69.12, 3],
-               object_range_filter=[-39.68, 0, -1, 39.68, 69.12, 3]             
+               point_range_filter=[0, -39.68, -1, 69.12, 39.68, 3],
+               object_range_filter=[0, -39.68, -1, 69.12, 39.68, 3]             
            )
 
     train_dataset =  SELMADataset(root_path="../data/CV/dataset/",
