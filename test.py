@@ -68,16 +68,19 @@ def main(args):
             batch_results = model(batched_pts=batched_pts, 
                                   mode='test')
             for j, r in enumerate(batch_results):
-                temp_dict = {}
-                temp_dict["index"] = i * args.batch_size + j
-                print(r)
-                print(data_dict.keys())
-                temp_dict["pred_bboxes"] = r["lidar_bboxes"].tolist()
-                temp_dict["pred_labels"] = r["labels"].tolist()
-                temp_dict["pred_scores"] = r["scores"].tolist()
-                temp_dict["gt_bboxes"] = data_dict["batched_gt_bboxes"][j].tolist()
-                temp_dict["gt_labels"] = data_dict["batched_label"][j].tolist()
-                results.append(temp_dict)
+                try:
+                    print(r)
+                    temp_dict = {}
+                    temp_dict["index"] = i * args.batch_size + j
+                    temp_dict["pred_bboxes"] = r["lidar_bboxes"].tolist()
+                    temp_dict["pred_labels"] = r["labels"].tolist()
+                    temp_dict["pred_scores"] = r["scores"].tolist()
+                    temp_dict["gt_bboxes"] = data_dict["batched_gt_bboxes"][j].tolist()
+                    temp_dict["gt_labels"] = data_dict["batched_labels"][j].tolist()
+                    results.append(temp_dict)
+                except:
+                    print("Error")
+                
     base_name = args.ckpt.split('/')[-1].split('.')[0]
     # write results to file as a json format
     with open(f'./results/{base_name}_{args.split}_{str(args.flip)}.txt', 'w') as f:
