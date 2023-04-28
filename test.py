@@ -69,7 +69,6 @@ def main(args):
                                   mode='test')
             for j, r in enumerate(batch_results):
                 try:
-                    print(r)
                     temp_dict = {}
                     temp_dict["index"] = i * args.batch_size + j
                     temp_dict["pred_bboxes"] = r["lidar_bboxes"].tolist()
@@ -79,6 +78,7 @@ def main(args):
                     temp_dict["gt_labels"] = data_dict["batched_labels"][j].tolist()
                     results.append(temp_dict)
                 except:
+                    print(r)
                     print("Error")
                 
     base_name = args.ckpt.split('/')[-1].split('.')[0]
