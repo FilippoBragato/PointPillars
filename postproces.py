@@ -69,18 +69,16 @@ def change_format(prediction):
     new_gt = []
     new_pred = []
     
-    new_gt_labels = []
 
-    for bbox, label in zip(ground_truth, prediction['gt_labels']):
+    for bbox in ground_truth:
         new_bb = convert_bounding_box(bbox)
         new_gt.append(new_bb)
-        new_gt_labels.append(label)
 
     for bbox in predicted:
         new_bb = convert_bounding_box(bbox)
         new_pred.append(new_bb)
 
-    return {"gt_bboxes_3d": np.array(new_gt),
-            "gt_labels": np.array(new_gt_labels),
-            "pred_bboxes_3d": np.array(new_pred),
-            "pred_labels": np.array(prediction['pred_labels'])}
+    prediction['gt_bboxes'] = np.array(new_gt)
+    prediction['pred_bboxes'] = np.array(new_pred)
+
+    return prediction
