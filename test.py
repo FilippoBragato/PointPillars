@@ -75,6 +75,7 @@ def main(args):
                     temp_dict["pred_labels"] = r["labels"].tolist()
                     temp_dict["pred_scores"] = r["scores"].tolist()
                     temp_dict["gt_bboxes"] = data_dict["batched_gt_bboxes"][j].tolist()
+                    temp_dict["gt_labels"] = data_dict["batched_label"][j].tolist()
                     results.append(temp_dict)
                 except:
                     print(r)
