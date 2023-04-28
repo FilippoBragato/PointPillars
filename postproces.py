@@ -137,6 +137,7 @@ def compute_average_precision(predictions, threshold=0.5):
 
             # compute average precision
             ap = pascal_voc_n(precision, recall)
+            print(ap)
             aps[class_id, index_prediction] = ap
     return aps
     
