@@ -81,6 +81,9 @@ def change_format(prediction):
 
     prediction['gt_bboxes'] = np.array(new_gt)
     prediction['pred_bboxes'] = np.array(new_pred)
+    prediction['gt_labels'] = np.array(prediction['gt_labels'])
+    prediction['pred_labels'] = np.array(prediction['pred_labels'])
+    prediction['pred_scores'] = np.array(prediction['pred_scores'])
 
     return prediction
 
