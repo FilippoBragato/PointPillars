@@ -243,7 +243,7 @@ class SELMADataset(CityDataset):
         new_out_dict["pts"] = points
 
         # BOUNDING_BOXES
-        all_bbs_ids = out_dict['bbox'].keys()
+        all_bbs_ids = np.array(list(out_dict['bbox'].keys()))
         all_bbs = []
         for id in all_bbs_ids:
             bb = out_dict['bbox'][id]
