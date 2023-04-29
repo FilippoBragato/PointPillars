@@ -177,6 +177,10 @@ def main(args):
             continue
         pointpillars.eval()
         with torch.no_grad():
+            entire_validation_loss_dict = {'cls_loss':      0, 
+                                           'reg_loss':      0,
+                                           'dir_cls_loss':  0,
+                                           'total_loss':    0} 
             for i, data_dict in enumerate(tqdm(val_dataloader)):
                 try:
                     if not args.no_cuda:
@@ -231,9 +235,17 @@ def main(args):
                     global_step = epoch * len(val_dataloader) + val_step + 1
                     if global_step % args.log_freq == 0:
                         save_summary(writer, loss_dict, global_step, 'val')
+                    for key in loss_dict:
+                        entire_validation_loss_dict[key] += loss_dict[key]
                     val_step += 1
                 except:
                     pass
+            try:
+                for key in entire_validation_loss_dict:
+                    entire_validation_loss_dict[key] /= val_step
+                save_summary(writer, entire_validation_loss_dict, epoch, 'average_val')
+            except:
+                pass
         pointpillars.train()
 
 
