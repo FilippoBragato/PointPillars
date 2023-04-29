@@ -243,9 +243,9 @@ class SELMADataset(CityDataset):
         new_out_dict["pts"] = points
 
         # BOUNDING_BOXES
-        bbs_ids = out_dict['bbox'].keys()
-        bbs = []
-        for id in bbs_ids:
+        all_bbs_ids = out_dict['bbox'].keys()
+        all_bbs = []
+        for id in all_bbs_ids:
             bb = out_dict['bbox'][id]
             R = np.array(bb['rotation'])
             beta = -np.arcsin(R[2,0])
@@ -257,50 +257,53 @@ class SELMADataset(CityDataset):
                        bb['extent']['y'],
                        bb['extent']['z'],
                        gamma]
-            bbs.append(bb_list)
-        bbs = np.array(bbs,dtype=np.float32)
+            all_bbs.append(bb_list)
+        all_bbs = np.array(all_bbs,dtype=np.float32)
 
         # 1.1 bbox rotation
-        if len(bbs.shape) == 2:
+        if len(all_bbs.shape) == 2:
             if flip:
-                bbs[:, :2] = -bbs[:, :2]
-                bbs[:, 6] -= np.pi
+                all_bbs[:, :2] = -all_bbs[:, :2]
+                all_bbs[:, 6] -= np.pi
 
-            mask = bbs[:,0] > boundaries[1]
-            mask = np.logical_and(mask, bbs[:,0] < boundaries[4])
-            mask = np.logical_and(mask, bbs[:,1] > boundaries[0])
-            mask = np.logical_and(mask, bbs[:,1] < boundaries[3])
-            mask = np.logical_and(mask, bbs[:,2] > boundaries[2])
-            mask = np.logical_and(mask, bbs[:,2] < boundaries[5])
-            bbs = bbs[mask,:]
+            mask = all_bbs[:,0] > boundaries[1]
+            mask = np.logical_and(mask, all_bbs[:,0] < boundaries[4])
+            mask = np.logical_and(mask, all_bbs[:,1] > boundaries[0])
+            mask = np.logical_and(mask, all_bbs[:,1] < boundaries[3])
+            mask = np.logical_and(mask, all_bbs[:,2] > boundaries[2])
+            mask = np.logical_and(mask, all_bbs[:,2] < boundaries[5])
+            bbs = all_bbs[mask,:]
             bbs[:,[0,1,3,4]] = bbs[:,[1,0,4,3]]
             bbs[:,6] = -bbs[:,6]
+
+            # LABELS
+            bikes = ["vehicle.harley-davidson.low_rider",
+                    "vehicle.yamaha.yzf",
+                    "vehicle.kawasaki.ninja",
+                    "vehicle.vespa.zx125",
+                    "vehicle.bh.crossbike",
+                    "vehicle.gazelle.omafiets",
+                    "vehicle.diamondback.century"]
+            
+            labels = []
+            bbs_ids = all_bbs_ids[mask]
+            for id in bbs_ids:
+                bb = out_dict['bbox'][id]
+                bp_id = bb["bp_id"]
+                if bp_id in bikes:
+                    labels.append(1)
+                elif "pedestrian" in bp_id:
+                    labels.append(0)
+                else:
+                    labels.append(2)
+            labels = np.array(labels)
+            new_out_dict["gt_labels"] = labels
         else:
             return self.__getitem__(random.randint(0, len(self)-1))
 
         new_out_dict["gt_bboxes_3d"] = bbs
 
-        # LABELS
-        bikes = ["vehicle.harley-davidson.low_rider",
-                 "vehicle.yamaha.yzf",
-                 "vehicle.kawasaki.ninja",
-                 "vehicle.vespa.zx125",
-                 "vehicle.bh.crossbike",
-                 "vehicle.gazelle.omafiets",
-                 "vehicle.diamondback.century"]
         
-        labels = []
-        for id in bbs_ids:
-            bb = out_dict['bbox'][id]
-            bp_id = bb["bp_id"]
-            if bp_id in bikes:
-                labels.append(1)
-            elif "pedestrian" in bp_id:
-                labels.append(0)
-            else:
-                labels.append(2)
-        labels = np.array(labels)
-        new_out_dict["gt_labels"] = labels
         return new_out_dict
 
 
