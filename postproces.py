@@ -139,6 +139,7 @@ def compute_average_precision(predictions, threshold=0.5):
                 print(pred.shape, gt.shape)
                 _, iou = box3d_overlap(torch.tensor(pred, dtype=torch.float32), torch.tensor(gt, dtype=torch.float32))
                 # compute average precision
+                iou = iou.numpy()
                 true_positive = np.max(iou, axis = 1) > threshold
 
                 # sort by confidence
