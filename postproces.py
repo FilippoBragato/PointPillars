@@ -119,8 +119,12 @@ def pascal_voc_n(precision, recall, n=11):
     return ap
 
 def compute_average_precision(predictions, threshold=0.5):
+    # find the maximum index in predictions
+    max_index = 0
+    for prediction in predictions:
+        max_index = max(max_index, prediction['index'])
     # compute average precision for each class
-    aps = np.empty((3, len(predictions)))
+    aps = np.empty((3, max_index + 1))
     for class_id in range(3):
         for index_prediction, prediction in enumerate(predictions):
             # get all predictions for the class
