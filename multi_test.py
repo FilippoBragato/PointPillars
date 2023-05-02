@@ -14,4 +14,8 @@ if __name__ == "__main__":
     ckpts = glob.glob(os.path.join(args.ckpt_folder, '*.pth'))
     for ckpt in ckpts:
         print(ckpt)
-        test('val', ckpt, args.flip, False, 6, 16)
+        base_name = ckpt.split('/')[-1].split('.')[0]
+        if os.path.isfile(f'./results/{base_name}_val_{str(args.flip)}.txt'):
+            print('Already tested')
+        else:
+            test('val', ckpt, args.flip, False, 6, 16)

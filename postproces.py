@@ -2,6 +2,9 @@ import json
 import numpy as np
 import torch
 from pytorch3d.ops import box3d_overlap
+import argparse
+import glob
+import os
 
 def open_results(path):
     results = []
@@ -124,8 +127,7 @@ def compute_average_precision(predictions, threshold=0.5):
             gt = prediction['gt_bboxes'][prediction['gt_labels'] == class_id]
             pred = prediction['pred_bboxes'][prediction['pred_labels'] == class_id]
             # compute iou
-            print(gt.shape)
-            print(pred.shape)
+
             _, iou = box3d_overlap(torch.tensor(pred, dtype=torch.float32), torch.tensor(gt, dtype=torch.float32))
             # compute average precision
             true_positive = np.max(iou, axis = 1) > threshold
@@ -143,6 +145,41 @@ def compute_average_precision(predictions, threshold=0.5):
             # compute average precision
             ap = pascal_voc_n(precision, recall)
             print(ap)
-            aps[class_id, index_prediction] = ap
+            aps[class_id, prediction['index']] = ap
     return aps
     
+
+
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(description='Configuration Parameters')
+    parser.add_argument('--results_folder', default='./results', help='your results file')
+    parser.add_argument('--output_folder', default='./postprocess_data', help='where to store the postprocessed data')
+
+    
+    args = parser.parse_args()
+
+    result_list = glob.glob(os.path.join(args.results_folder, '*.txt'))
+
+    for result_file in result_list:
+
+        #create output folder if it does not exist
+        if not os.path.exists(args.output_folder):
+            os.makedirs(args.output_folder)
+
+        print(result_file)
+
+        filename = os.path.basename(result_file)
+        filename = filename.split('.')[0]
+        out_file = os.path.join(args.output_folder, filename, '.csv')
+
+        if os.path.exists(out_file):
+            print('already processed') 
+
+        else:
+            results = open_results(result_file)
+            results = [change_format(result) for result in results]
+            aps = compute_average_precision(results)
+
+            # save results
+            np.savetxt(out_file, aps, delimiter=',')

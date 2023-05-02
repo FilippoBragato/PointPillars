@@ -86,8 +86,7 @@ def test(split, ckpt, flip, no_cuda, batch_size, num_workers):
                     temp_dict["gt_labels"] = data_dict["batched_labels"][j].tolist()
                     results.append(temp_dict)
                 except:
-                    print(r)
-                    print("Error")
+                    pass
                 
     base_name = ckpt.split('/')[-1].split('.')[0]
     # write results to file as a json format
