@@ -12,8 +12,8 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
 
-    compression_levels = [0, 5, 10]
-    quantization_levels = [8, 14, 11]
+    compression_levels = [0, 2, 3, 5, 7, 8, 10]
+    quantization_levels = [2, 4, 6, 8, 14, 10, 11, 12]
 
     for compression_level in compression_levels:
         for quantization_level in quantization_levels:
