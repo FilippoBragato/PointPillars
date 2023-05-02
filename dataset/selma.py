@@ -238,9 +238,11 @@ class SELMADataset(CityDataset):
 
         if self.draco_compression:
             encoded = DracoPy.encode(points, 
-                                        quantization_bits=self.draco_quantization_bits,
-                                        compression_level=self.draco_compression_level)
+                                     quantization_bits=self.draco_quantization_bits,
+                                     compression_level=self.draco_compression_level)
             points = DracoPy.decode(encoded).points
+            # convert to float32
+            points = points.astype(np.float32)
 
         # 1.2 point rotation
         if flip:
