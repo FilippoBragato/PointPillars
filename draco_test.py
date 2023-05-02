@@ -8,6 +8,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Configuration Parameters')
     parser.add_argument('--flip', action="store_true", help='flip the image')
     parser.add_argument('--ckpt', default='./pillar_loggs/checkpoints/null.pth', help='your checkpoint folder')
+    parser.add_argument('--num_workers', default=6, help='number of workers')
     
     args = parser.parse_args()
 
@@ -34,7 +35,7 @@ if __name__ == "__main__":
                                 draco_compression_level=compression_level,
                                 draco_quantization_level=quantization_level
                                 )
-                test(dataset, args.ckpt, False, 6, 16, f'./results/draco_test_{str(args.flip)}_{str(quantization_level)}_{str(compression_level)}.txt')
+                test(dataset, args.ckpt, False, 6, args.num_workers, f'./results/draco_test_{str(args.flip)}_{str(quantization_level)}_{str(compression_level)}.txt')
     print('No compression')
     dataset = SELMADataset(root_path="../data/CV/dataset/",
                            splits_path="./dataset/ImageSets/",
@@ -48,4 +49,4 @@ if __name__ == "__main__":
                            format_flip=args.flip,
                            draco_compression=False
                            )
-    test(dataset, args.ckpt, False, 6, 16, f'./results/test_{str(args.flip)}.txt')
+    test(dataset, args.ckpt, False, 6, args.num_workers, f'./results/test_{str(args.flip)}.txt')
