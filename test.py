@@ -21,7 +21,7 @@ def point_range_filter(pts, point_range=[0, -39.68, -3, 69.12, 39.68, 1]):
     return pts 
     
 
-def test(split, ckpt, flip, no_cuda, batch_size, num_workers):
+def test(dataset, ckpt, no_cuda, batch_size, num_workers, out_file_path):
 
     """ Test the model on a set, save the predictions in a json file
     Args:
@@ -38,17 +38,7 @@ def test(split, ckpt, flip, no_cuda, batch_size, num_workers):
         'Cyclist': 1, 
         'Car': 2
         }
-    dataset =  SELMADataset(root_path="../data/CV/dataset/",
-                            splits_path="./dataset/ImageSets/",
-                            split=split,
-                            split_extension="txt",
-                            augment_data=False,
-                            sensors=['lidar', 'bbox'],
-                            sensor_positions=['T'],
-                            bbox_location="../data/corrected_bbox/",
-                            n_min=5,
-                            format_flip=flip,
-                            )
+    
     dataloader = get_dataloader(dataset=dataset, 
                                 batch_size=batch_size, 
                                 num_workers=num_workers,
@@ -90,7 +80,7 @@ def test(split, ckpt, flip, no_cuda, batch_size, num_workers):
                 
     base_name = ckpt.split('/')[-1].split('.')[0]
     # write results to file as a json format
-    with open(f'./results/{base_name}_{split}_{str(flip)}.txt', 'w') as f:
+    with open(out_file_path, 'w') as f:
         f.write("[\n")
         for result in results:
             f.write(str(result))

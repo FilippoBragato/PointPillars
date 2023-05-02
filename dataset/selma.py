@@ -7,6 +7,7 @@ from math import atan2
 from .cityscapes import CityDataset
 from .data_aug import data_augment
 import random
+import DracoPy
 
 class SELMADataset(CityDataset):
     def __init__(self,
@@ -21,6 +22,9 @@ class SELMADataset(CityDataset):
                  n_min=5, # minimum number of points related to a bounding box to consider it valid
                  lidar_data_aug_config=dict(),
                  format_flip=None,
+                 draco_compression=False,
+                 draco_quantization_bits=14,
+                 draco_compression_level=7,
                  **kwargs): # whether to use city19 or city36 class set
 
         super(SELMADataset, self).__init__(split_extension=split_extension, #TODO
@@ -90,6 +94,10 @@ class SELMADataset(CityDataset):
         self.lidar_data_aug_config = lidar_data_aug_config
         
         self.format_flip = format_flip
+
+        self.draco_compression = draco_compression
+        self.draco_quantization_bits = draco_quantization_bits
+        self.draco_compression_level = draco_compression_level
 
     def init_ids(self):
         self.raw_to_train = {-1:-1, 0:-1, 1:2, 2:4, 3:-1, 4:-1, 5:5, 6:0, 7:0, 8:1, 9:8, 10:-1,
@@ -200,6 +208,7 @@ class SELMADataset(CityDataset):
                     out_dict['bbox'].pop(i)
                 except:
                     pass
+            
             out_dict = self._modify_format(out_dict)
             if self.augment_data:
                 out_dict = data_augment(out_dict, self.lidar_data_aug_config)
@@ -226,6 +235,12 @@ class SELMADataset(CityDataset):
         for k in out_dict['lidar'].keys():
             points.append(out_dict['lidar'][k][0])
         points = np.concatenate(points, axis=0)
+
+        if self.draco_compression:
+            encoded = DracoPy.encode(points, 
+                                        quantization_bits=self.draco_quantization_bits,
+                                        compression_level=self.draco_compression_level)
+            points = DracoPy.decode(encoded).points
 
         # 1.2 point rotation
         if flip:

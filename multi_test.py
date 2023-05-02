@@ -2,6 +2,7 @@ from test import test
 import argparse
 import glob
 import os
+from dataset import SELMADataset
 
 
 if __name__ == "__main__":
@@ -18,4 +19,15 @@ if __name__ == "__main__":
         if os.path.isfile(f'./results/{base_name}_val_{str(args.flip)}.txt'):
             print('Already tested')
         else:
-            test('val', ckpt, args.flip, False, 6, 16)
+            dataset =  SELMADataset(root_path="../data/CV/dataset/",
+                            splits_path="./dataset/ImageSets/",
+                            split='val',
+                            split_extension="txt",
+                            augment_data=False,
+                            sensors=['lidar', 'bbox'],
+                            sensor_positions=['T'],
+                            bbox_location="../data/corrected_bbox/",
+                            n_min=5,
+                            format_flip=args.flip,
+                            )
+            test(dataset, ckpt, False, 6, 16, f'./results/{base_name}_val_{str(args.flip)}.txt')
