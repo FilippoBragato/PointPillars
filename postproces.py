@@ -129,26 +129,27 @@ def compute_average_precision(predictions, threshold=0.5):
             # compute iou
             if pred.shape[0] == 0 and gt.shape[0] == 0:
                 aps[class_id, prediction['index']] = 1
-                continue
-            
-            _, iou = box3d_overlap(torch.tensor(pred, dtype=torch.float32), torch.tensor(gt, dtype=torch.float32))
-            # compute average precision
-            true_positive = np.max(iou, axis = 1) > threshold
+            elif pred.shape[0] == 0 or gt.shape[0] == 0:
+                aps[class_id, prediction['index']] = 0
+            else:
+                _, iou = box3d_overlap(torch.tensor(pred, dtype=torch.float32), torch.tensor(gt, dtype=torch.float32))
+                # compute average precision
+                true_positive = np.max(iou, axis = 1) > threshold
 
-            # sort by confidence
-            conf = prediction['pred_scores'][prediction['pred_labels'] == class_id]
-            sorted_conf = np.argsort(conf)[::-1]
-            true_positive = true_positive[sorted_conf]
+                # sort by confidence
+                conf = prediction['pred_scores'][prediction['pred_labels'] == class_id]
+                sorted_conf = np.argsort(conf)[::-1]
+                true_positive = true_positive[sorted_conf]
 
-            # compute precision and recall
-            true_positive = np.cumsum(true_positive)
-            precision = true_positive / np.arange(1, len(true_positive) + 1)
-            recall = true_positive / gt.shape[0]
+                # compute precision and recall
+                true_positive = np.cumsum(true_positive)
+                precision = true_positive / np.arange(1, len(true_positive) + 1)
+                recall = true_positive / gt.shape[0]
 
-            # compute average precision
-            ap = pascal_voc_n(precision, recall)
-            print(ap)
-            aps[class_id, prediction['index']] = ap
+                # compute average precision
+                ap = pascal_voc_n(precision, recall)
+                print(ap)
+                aps[class_id, prediction['index']] = ap
     return aps
     
 
