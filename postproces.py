@@ -127,7 +127,8 @@ def compute_average_precision(predictions, threshold=0.5):
             gt = prediction['gt_bboxes'][prediction['gt_labels'] == class_id]
             pred = prediction['pred_bboxes'][prediction['pred_labels'] == class_id]
             # compute iou
-
+            print(pred.shape)
+            print(gt.shape)
             _, iou = box3d_overlap(torch.tensor(pred, dtype=torch.float32), torch.tensor(gt, dtype=torch.float32))
             # compute average precision
             true_positive = np.max(iou, axis = 1) > threshold
