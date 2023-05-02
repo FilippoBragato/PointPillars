@@ -171,7 +171,7 @@ if __name__ == "__main__":
 
         filename = os.path.basename(result_file)
         filename = filename.split('.')[0]
-        out_file = os.path.join(args.output_folder, filename, '.csv')
+        out_file = os.path.join(args.output_folder, filename+'.csv')
 
         if os.path.exists(out_file):
             print('already processed') 
