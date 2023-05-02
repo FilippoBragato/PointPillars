@@ -22,7 +22,7 @@ if __name__ == "__main__":
             else:
                 dataset =  SELMADataset(root_path="../data/CV/dataset/",
                                 splits_path="./dataset/ImageSets/",
-                                split='val',
+                                split='test',
                                 split_extension="txt",
                                 augment_data=False,
                                 sensors=['lidar', 'bbox'],
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     print('No compression')
     dataset = SELMADataset(root_path="../data/CV/dataset/",
                            splits_path="./dataset/ImageSets/",
-                           split='val',
+                           split='test',
                            split_extension="txt",
                            augment_data=False,
                            sensors=['lidar', 'bbox'],
