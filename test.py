@@ -1,9 +1,6 @@
 import argparse
-import numpy as np
-import os
 import torch
 from dataset import SELMADataset, get_dataloader
-from utils import read_points, keep_bbox_from_lidar_range
 from model import PointPillars
 from tqdm import tqdm
 
@@ -24,7 +21,18 @@ def point_range_filter(pts, point_range=[0, -39.68, -3, 69.12, 39.68, 1]):
     return pts 
     
 
-def main(args):
+def test(split, ckpt, flip, no_cuda, batch_size, num_workers):
+
+    """ Test the model on a set, save the predictions in a json file
+    Args:
+        split (str): split to test on
+        ckpt (str): path to the checkpoint
+        flip (bool): whether to flip the pointcloud
+        no_cuda (bool): whether to use cuda
+        batch_size (int): batch size
+        num_workers (int): number of workers
+    """
+
     CLASSES = {
         'Pedestrian': 0, 
         'Cyclist': 1, 
@@ -32,33 +40,33 @@ def main(args):
         }
     dataset =  SELMADataset(root_path="../data/CV/dataset/",
                             splits_path="./dataset/ImageSets/",
-                            split=args.split,
+                            split=split,
                             split_extension="txt",
                             augment_data=False,
                             sensors=['lidar', 'bbox'],
                             sensor_positions=['T'],
                             bbox_location="../data/corrected_bbox/",
                             n_min=5,
-                            format_flip=args.flip,
+                            format_flip=flip,
                             )
     dataloader = get_dataloader(dataset=dataset, 
-                                batch_size=args.batch_size, 
-                                num_workers=args.num_workers,
+                                batch_size=batch_size, 
+                                num_workers=num_workers,
                                 shuffle=False)
 
-    if not args.no_cuda:
+    if not no_cuda:
         model = PointPillars(nclasses=len(CLASSES)).cuda()
-        model.load_state_dict(torch.load(args.ckpt))
+        model.load_state_dict(torch.load(ckpt))
     else:
         model = PointPillars(nclasses=len(CLASSES))
         model.load_state_dict(
-            torch.load(args.ckpt, map_location=torch.device('cpu')))
+            torch.load(ckpt, map_location=torch.device('cpu')))
         
     model.eval()
     results = []
     for i, data_dict in enumerate(tqdm(dataloader)):
         with torch.no_grad():
-            if not args.no_cuda:
+            if not no_cuda:
                 # move the tensors to the cuda
                 for key in data_dict:
                     for j, item in enumerate(data_dict[key]):
@@ -70,7 +78,7 @@ def main(args):
             for j, r in enumerate(batch_results):
                 try:
                     temp_dict = {}
-                    temp_dict["index"] = i * args.batch_size + j
+                    temp_dict["index"] = i * batch_size + j
                     temp_dict["pred_bboxes"] = r["lidar_bboxes"].tolist()
                     temp_dict["pred_labels"] = r["labels"].tolist()
                     temp_dict["pred_scores"] = r["scores"].tolist()
@@ -81,9 +89,9 @@ def main(args):
                     print(r)
                     print("Error")
                 
-    base_name = args.ckpt.split('/')[-1].split('.')[0]
+    base_name = ckpt.split('/')[-1].split('.')[0]
     # write results to file as a json format
-    with open(f'./results/{base_name}_{args.split}_{str(args.flip)}.txt', 'w') as f:
+    with open(f'./results/{base_name}_{split}_{str(flip)}.txt', 'w') as f:
         f.write("[\n")
         for result in results:
             f.write(str(result))
@@ -108,4 +116,4 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
 
-    main(args)
+    test(args.split, args.ckpt, args.flip, args.no_cuda, args.batch_size, args.num_workers)
