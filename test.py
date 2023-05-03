@@ -63,21 +63,23 @@ def test(dataset, ckpt, no_cuda, batch_size, num_workers, out_file_path):
                         if torch.is_tensor(item):
                             data_dict[key][j] = data_dict[key][j].cuda()
             batched_pts = data_dict["batched_pts"]
-            print("BATCHED", np.unique(batched_pts[0].cpu().numpy(), axis=0))
-            batch_results = model(batched_pts=batched_pts, 
-                                  mode='test')
-            for j, r in enumerate(batch_results):
-                try:
-                    temp_dict = {}
-                    temp_dict["index"] = i * batch_size + j
-                    temp_dict["pred_bboxes"] = r["lidar_bboxes"].tolist()
-                    temp_dict["pred_labels"] = r["labels"].tolist()
-                    temp_dict["pred_scores"] = r["scores"].tolist()
-                    temp_dict["gt_bboxes"] = data_dict["batched_gt_bboxes"][j].tolist()
-                    temp_dict["gt_labels"] = data_dict["batched_labels"][j].tolist()
-                    results.append(temp_dict)
-                except:
-                    pass
+            try:
+                batch_results = model(batched_pts=batched_pts, 
+                                    mode='test')
+                for j, r in enumerate(batch_results):
+                    try:
+                        temp_dict = {}
+                        temp_dict["index"] = i * batch_size + j
+                        temp_dict["pred_bboxes"] = r["lidar_bboxes"].tolist()
+                        temp_dict["pred_labels"] = r["labels"].tolist()
+                        temp_dict["pred_scores"] = r["scores"].tolist()
+                        temp_dict["gt_bboxes"] = data_dict["batched_gt_bboxes"][j].tolist()
+                        temp_dict["gt_labels"] = data_dict["batched_labels"][j].tolist()
+                        results.append(temp_dict)
+                    except:
+                        pass
+            except:
+                print("Error in batch {}".format(i))
                 
     base_name = ckpt.split('/')[-1].split('.')[0]
     # write results to file as a json format

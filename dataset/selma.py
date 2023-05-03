@@ -212,7 +212,6 @@ class SELMADataset(CityDataset):
             out_dict = self._modify_format(out_dict)
             if self.augment_data:
                 out_dict = data_augment(out_dict, self.lidar_data_aug_config)
-        print("SELMA", np.unique(out_dict['pts'], axis=0).shape)
         return out_dict
 
     # carla.
