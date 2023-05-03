@@ -25,6 +25,7 @@ class SELMADataset(CityDataset):
                  draco_compression=False,
                  draco_quantization_bits=14,
                  draco_compression_level=7,
+                 point_cloud_range=[0, -39.68, -1, 69.12, 39.68, 3],
                  **kwargs): # whether to use city19 or city36 class set
 
         super(SELMADataset, self).__init__(split_extension=split_extension, #TODO
@@ -98,6 +99,8 @@ class SELMADataset(CityDataset):
         self.draco_compression = draco_compression
         self.draco_quantization_bits = draco_quantization_bits
         self.draco_compression_level = draco_compression_level
+
+        self.point_cloud_range = point_cloud_range
 
     def init_ids(self):
         self.raw_to_train = {-1:-1, 0:-1, 1:2, 2:4, 3:-1, 4:-1, 5:5, 6:0, 7:0, 8:1, 9:8, 10:-1,
@@ -221,7 +224,7 @@ class SELMADataset(CityDataset):
     #     t = t.sum(axis=2)/(256 * 256 * 256 - 1.)
     #     return t
 
-    def _modify_format(self, out_dict, boundaries=[0, -39.68, -1, 69.12, 39.68, 3] ):
+    def _modify_format(self, out_dict):
         if self.format_flip is None:
             flip = random.random() < .5
         else:
@@ -246,12 +249,12 @@ class SELMADataset(CityDataset):
         # 1.2 point rotation
         if flip:
             points[:, :2] = -points[:, :2]
-        mask = points[:,0] > boundaries[1]
-        mask = np.logical_and(mask, points[:,0] < boundaries[4])
-        mask = np.logical_and(mask, points[:,1] > boundaries[0])
-        mask = np.logical_and(mask, points[:,1] < boundaries[3])
-        mask = np.logical_and(mask, points[:,2] > boundaries[2])
-        mask = np.logical_and(mask, points[:,2] < boundaries[5])
+        mask = points[:,0] > self.point_cloud_range[1]
+        mask = np.logical_and(mask, points[:,0] < self.point_cloud_range[4])
+        mask = np.logical_and(mask, points[:,1] > self.point_cloud_range[0])
+        mask = np.logical_and(mask, points[:,1] < self.point_cloud_range[3])
+        mask = np.logical_and(mask, points[:,2] > self.point_cloud_range[2])
+        mask = np.logical_and(mask, points[:,2] < self.point_cloud_range[5])
         points = points[mask,:]
         points[:, :2] = points[:, [1,0]]
         # points = np.concatenate((points, np.zeros((points.shape[0],1), dtype=np.float32)), axis=1)
@@ -282,12 +285,12 @@ class SELMADataset(CityDataset):
                 all_bbs[:, :2] = -all_bbs[:, :2]
                 all_bbs[:, 6] -= np.pi
 
-            mask = all_bbs[:,0] > boundaries[1]
-            mask = np.logical_and(mask, all_bbs[:,0] < boundaries[4])
-            mask = np.logical_and(mask, all_bbs[:,1] > boundaries[0])
-            mask = np.logical_and(mask, all_bbs[:,1] < boundaries[3])
-            mask = np.logical_and(mask, all_bbs[:,2] > boundaries[2])
-            mask = np.logical_and(mask, all_bbs[:,2] < boundaries[5])
+            mask = all_bbs[:,0] > self.point_cloud_range[1]
+            mask = np.logical_and(mask, all_bbs[:,0] < self.point_cloud_range[4])
+            mask = np.logical_and(mask, all_bbs[:,1] > self.point_cloud_range[0])
+            mask = np.logical_and(mask, all_bbs[:,1] < self.point_cloud_range[3])
+            mask = np.logical_and(mask, all_bbs[:,2] > self.point_cloud_range[2])
+            mask = np.logical_and(mask, all_bbs[:,2] < self.point_cloud_range[5])
             bbs = all_bbs[mask,:]
             bbs[:,[0,1,3,4]] = bbs[:,[1,0,4,3]]
             bbs[:,6] = -bbs[:,6]

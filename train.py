@@ -24,20 +24,27 @@ def save_summary(writer, loss_dict, global_step, tag, lr=None, momentum=None):
 
 def main(args):
     setup_seed()
+    point_cloud_range = [0, -40.0, -1, 69.50, 40.0, 3]
+    voxel_size = [0.5, 0.5, 4]
+
+    assert (point_cloud_range[3] - point_cloud_range[0]) / voxel_size[0] % 1 == 0
+    assert (point_cloud_range[4] - point_cloud_range[1]) / voxel_size[1] % 1 == 0
+    assert (point_cloud_range[5] - point_cloud_range[2]) / voxel_size[2] % 1 == 0
+
     data_aug = dict(object_noise=dict(
-                   num_try=100,
-                   translation_std=[0.25, 0.25, 0.25],
-                   rot_range=[-0.15707963267, 0.15707963267]
-                   ),
-               random_flip_ratio=0.5,
-               global_rot_scale_trans=dict(
-                   rot_range=[-0.78539816, 0.78539816],
-                   scale_ratio_range=[0.95, 1.05],
-                   translation_std=[0, 0, 0]
-                   ), 
-               point_range_filter=[0, -39.68, -1, 69.12, 39.68, 3],
-               object_range_filter=[0, -39.68, -1, 69.12, 39.68, 3]             
-           )
+                        num_try=100,
+                        translation_std=[0.25, 0.25, 0.25],
+                        rot_range=[-0.15707963267, 0.15707963267]
+                        ),
+                    random_flip_ratio=0.5,
+                    global_rot_scale_trans=dict(
+                        rot_range=[-0.78539816, 0.78539816],
+                        scale_ratio_range=[0.95, 1.05],
+                        translation_std=[0, 0, 0]
+                    ), 
+                    point_range_filter=point_cloud_range,
+                    object_range_filter=point_cloud_range            
+                    )
 
     train_dataset =  SELMADataset(root_path="../data/CV/dataset/",
                                   splits_path="./dataset/ImageSets/",
@@ -48,7 +55,8 @@ def main(args):
                                   sensor_positions=['T'],
                                   bbox_location="../data/corrected_bbox/",
                                   n_min=5,
-                                  lidar_data_aug_config=data_aug
+                                  lidar_data_aug_config=data_aug,
+                                  point_cloud_range=point_cloud_range
                                   )
     val_dataset =  SELMADataset(root_path="../data/CV/dataset/",
                                 splits_path="./dataset/ImageSets/",
@@ -58,7 +66,8 @@ def main(args):
                                 sensors=['lidar', 'bbox'],
                                 sensor_positions=['T'],
                                 bbox_location="../data/corrected_bbox/",
-                                n_min=5
+                                n_min=5,
+                                point_cloud_range=point_cloud_range
                                 )
     train_dataloader = get_dataloader(dataset=train_dataset, 
                                       batch_size=args.batch_size, 
@@ -68,12 +77,15 @@ def main(args):
                                     batch_size=args.batch_size, 
                                     num_workers=args.num_workers,
                                     shuffle=False)
-
     if not args.no_cuda:
-        pointpillars = PointPillars(nclasses=args.nclasses).cuda()
+        pointpillars = PointPillars(nclasses=args.nclasses,
+                                    point_cloud_range=point_cloud_range,
+                                    voxel_size=voxel_size).cuda()
         # pointpillars.load_state_dict(torch.load("pretrained/summary/events.out.tfevents.1650798663.VM-1-6-ubuntu.6731.0"))
     else:
-        pointpillars = PointPillars(nclasses=args.nclasses)
+        pointpillars = PointPillars(nclasses=args.nclasses,
+                                    point_cloud_range=point_cloud_range,
+                                    voxel_size=voxel_size)
         # pointpillars.load_state_dict(torch.load("pretrained/summary/events.out.tfevents.1650798663.VM-1-6-ubuntu.6731.0"))
     loss_func = Loss()
 
@@ -258,7 +270,7 @@ if __name__ == '__main__':
     parser.add_argument('--init_lr', type=float, default=0.00025)
     parser.add_argument('--max_epoch', type=int, default=60)
     parser.add_argument('--log_freq', type=int, default=8)
-    parser.add_argument('--ckpt_freq_epoch', type=int, default=2)
+    parser.add_argument('--ckpt_freq_epoch', type=int, default=1)
     parser.add_argument('--no_cuda', action='store_true',
                         help='whether to use cuda')
     parser.add_argument('--profile', action='store_true',
