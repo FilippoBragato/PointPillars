@@ -25,12 +25,12 @@ def test(dataset, ckpt, no_cuda, batch_size, num_workers, out_file_path):
 
     """ Test the model on a set, save the predictions in a json file
     Args:
-        split (str): split to test on
-        ckpt (str): path to the checkpoint
-        flip (bool): whether to flip the pointcloud
-        no_cuda (bool): whether to use cuda
-        batch_size (int): batch size
-        num_workers (int): number of workers
+        dataset: the dataset to test on
+        ckpt: the checkpoint to load
+        no_cuda: whether to use cuda or not
+        batch_size: the batch size to use
+        num_workers: the number of workers to use
+        out_file_path: the path to save the results
     """
 
     CLASSES = {
@@ -63,7 +63,7 @@ def test(dataset, ckpt, no_cuda, batch_size, num_workers, out_file_path):
                         if torch.is_tensor(item):
                             data_dict[key][j] = data_dict[key][j].cuda()
             batched_pts = data_dict["batched_pts"]
-            print(np.unique(batched_pts[0].cpu().numpy(), axis=1))
+            print("BATCHED", np.unique(batched_pts[0].cpu().numpy(), axis=0))
             batch_results = model(batched_pts=batched_pts, 
                                   mode='test')
             for j, r in enumerate(batch_results):
