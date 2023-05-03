@@ -26,6 +26,7 @@ def main(args):
     setup_seed()
     point_cloud_range = [0, -40.0, -1, 69.50, 40.0, 3]
     voxel_size = [0.5, 0.5, 4]
+    backbone_padding = [0,1,1]
 
     assert (point_cloud_range[3] - point_cloud_range[0]) / voxel_size[0] % 1 == 0
     assert (point_cloud_range[4] - point_cloud_range[1]) / voxel_size[1] % 1 == 0
@@ -80,12 +81,14 @@ def main(args):
     if not args.no_cuda:
         pointpillars = PointPillars(nclasses=args.nclasses,
                                     point_cloud_range=point_cloud_range,
-                                    voxel_size=voxel_size).cuda()
+                                    voxel_size=voxel_size,
+                                    backbone_padding=backbone_padding).cuda()
         # pointpillars.load_state_dict(torch.load("pretrained/summary/events.out.tfevents.1650798663.VM-1-6-ubuntu.6731.0"))
     else:
         pointpillars = PointPillars(nclasses=args.nclasses,
                                     point_cloud_range=point_cloud_range,
-                                    voxel_size=voxel_size)
+                                    voxel_size=voxel_size,
+                                    backbone_padding=backbone_padding)
         # pointpillars.load_state_dict(torch.load("pretrained/summary/events.out.tfevents.1650798663.VM-1-6-ubuntu.6731.0"))
     loss_func = Loss()
 
