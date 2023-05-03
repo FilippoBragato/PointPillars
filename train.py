@@ -26,7 +26,7 @@ def main(args):
     setup_seed()
     point_cloud_range = [0, -40.0, -1, 70.0, 40.0, 3]
     voxel_size = [0.5, 0.5, 4]
-    backbone_padding = [0,1,1]
+    backbone_padding = [1,1,1]
 
     assert (point_cloud_range[3] - point_cloud_range[0]) / voxel_size[0] % 1 == 0
     assert (point_cloud_range[4] - point_cloud_range[1]) / voxel_size[1] % 1 == 0
