@@ -388,7 +388,7 @@ class PointPillars(nn.Module):
 
         # xs:  [(bs, 64, 248, 216), (bs, 128, 124, 108), (bs, 256, 62, 54)]
         xs = self.backbone(pillar_features)
-
+        print(xs.shape)
         # x: (bs, 384, 248, 216)
         x = self.neck(xs)
 
