@@ -24,7 +24,7 @@ def save_summary(writer, loss_dict, global_step, tag, lr=None, momentum=None):
 
 def main(args):
     setup_seed()
-    point_cloud_range = [0, -40.0, -1, 70.0, 40.0, 3]
+    point_cloud_range = [0, -40.0, -1, 72.0, 40.0, 3]
     voxel_size = [0.5, 0.5, 4]
     backbone_padding = [1,1,1]
 
