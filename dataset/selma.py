@@ -240,7 +240,6 @@ class SELMADataset(CityDataset):
                                      quantization_bits=self.draco_quantization_bits,
                                      compression_level=self.draco_compression_level)
             points = DracoPy.decode(encoded).points
-            print("DRACO", np.unique(points, axis=0).shape)
             # convert to float32
             points = points.astype(np.float32)
 
