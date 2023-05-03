@@ -1,7 +1,10 @@
 import json
 import numpy as np
 import torch
-from pytorch3d.ops import box3d_overlap
+try:
+    from pytorch3d.ops import box3d_overlap
+except:
+    print("pytorch3d not installed, cannot compute overlap")
 import argparse
 import glob
 import os
@@ -78,8 +81,11 @@ def change_format(prediction):
         new_gt.append(new_bb)
 
     for bbox in predicted:
-        new_bb = convert_bounding_box(bbox)
-        new_pred.append(new_bb)
+        if bbox == []:
+            new_pred.append(np.empty((8,3)))
+        else:
+            new_bb = convert_bounding_box(bbox)
+            new_pred.append(new_bb)
 
     prediction['gt_bboxes'] = np.array(new_gt)
     prediction['pred_bboxes'] = np.array(new_pred)
