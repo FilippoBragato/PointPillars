@@ -3,7 +3,7 @@ import torch
 from dataset import SELMADataset, get_dataloader
 from model import PointPillars
 from tqdm import tqdm
-
+import numpy as np
 
 def point_range_filter(pts, point_range=[0, -39.68, -3, 69.12, 39.68, 1]):
     '''
@@ -63,7 +63,7 @@ def test(dataset, ckpt, no_cuda, batch_size, num_workers, out_file_path):
                         if torch.is_tensor(item):
                             data_dict[key][j] = data_dict[key][j].cuda()
             batched_pts = data_dict["batched_pts"]
-            print(batched_pts[0].shape)
+            print(np.unique(batched_pts[0].numpy(), axis=1))
             batch_results = model(batched_pts=batched_pts, 
                                   mode='test')
             for j, r in enumerate(batch_results):
