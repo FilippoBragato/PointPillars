@@ -50,3 +50,4 @@ if __name__ == "__main__":
                            draco_compression=False
                            )
     test(dataset, args.ckpt, False, 6, int(args.num_workers), f'./results/test_{str(args.flip)}.txt')
+    

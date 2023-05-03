@@ -63,6 +63,7 @@ def test(dataset, ckpt, no_cuda, batch_size, num_workers, out_file_path):
                         if torch.is_tensor(item):
                             data_dict[key][j] = data_dict[key][j].cuda()
             batched_pts = data_dict["batched_pts"]
+            print(batched_pts.shape)
             batch_results = model(batched_pts=batched_pts, 
                                   mode='test')
             for j, r in enumerate(batch_results):
