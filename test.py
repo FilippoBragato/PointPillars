@@ -77,11 +77,25 @@ def test(dataset, ckpt, no_cuda, batch_size, num_workers, out_file_path):
                         temp_dict["gt_labels"] = data_dict["batched_labels"][j].tolist()
                         results.append(temp_dict)
                     except:
-                        pass
+                        temp_dict = {}
+                        temp_dict["index"] = i * batch_size + j
+                        temp_dict["pred_bboxes"] = [[]]
+                        temp_dict["pred_labels"] = []
+                        temp_dict["pred_scores"] = []
+                        temp_dict["gt_bboxes"] = data_dict["batched_gt_bboxes"][j].tolist()
+                        temp_dict["gt_labels"] = data_dict["batched_labels"][j].tolist()
+                        results.append(temp_dict)
             except:
-                print("Error in batch {}".format(i))
-                
-    base_name = ckpt.split('/')[-1].split('.')[0]
+                for j in range(batch_size):
+                    temp_dict = {}
+                    temp_dict["index"] = i * batch_size + j
+                    temp_dict["pred_bboxes"] = [[]]
+                    temp_dict["pred_labels"] = []
+                    temp_dict["pred_scores"] = []
+                    temp_dict["gt_bboxes"] = data_dict["batched_gt_bboxes"][j].tolist()
+                    temp_dict["gt_labels"] = data_dict["batched_labels"][j].tolist()
+                    results.append(temp_dict)
+                    
     # write results to file as a json format
     with open(out_file_path, 'w') as f:
         f.write("[\n")
