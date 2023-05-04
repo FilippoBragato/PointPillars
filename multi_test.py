@@ -45,5 +45,7 @@ if __name__ == "__main__":
                             bbox_location="../data/corrected_bbox/",
                             n_min=5,
                             format_flip=args.flip,
+                            point_cloud_range=point_cloud_range,
+                            voxel_size=voxel_size
                             )
-            test(dataset, ckpt, False, 6, 24, out_file)
+            test(dataset, ckpt, False, 6, 24, out_file, point_cloud_range=point_cloud_range, voxel_size=voxel_size)
