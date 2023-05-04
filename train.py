@@ -24,8 +24,8 @@ def save_summary(writer, loss_dict, global_step, tag, lr=None, momentum=None):
 
 def main(args):
     setup_seed()
-    point_cloud_range = [0, -40.0, -1, 72.0, 40.0, 3]
-    voxel_size = [0.5, 0.5, 4]
+    point_cloud_range = [0, -39.68, -1, 69.12, 39.68, 3]
+    voxel_size = [0.16, 0.16, 4]
     backbone_padding = [1,1,1]
 
     assert (point_cloud_range[3] - point_cloud_range[0]) / voxel_size[0] % 1 == 0
@@ -83,30 +83,33 @@ def main(args):
                                     point_cloud_range=point_cloud_range,
                                     voxel_size=voxel_size,
                                     backbone_padding=backbone_padding).cuda()
-        # pointpillars.load_state_dict(torch.load("pretrained/summary/events.out.tfevents.1650798663.VM-1-6-ubuntu.6731.0"))
+        pointpillars.load_state_dict(torch.load("pillar_loggs/checkpoints/epoch_60.pth"))
     else:
         pointpillars = PointPillars(nclasses=args.nclasses,
                                     point_cloud_range=point_cloud_range,
                                     voxel_size=voxel_size,
                                     backbone_padding=backbone_padding)
-        # pointpillars.load_state_dict(torch.load("pretrained/summary/events.out.tfevents.1650798663.VM-1-6-ubuntu.6731.0"))
+        pointpillars.load_state_dict(torch.load("pillar_loggs/checkpoints/epoch_60.pth"))
     loss_func = Loss()
 
     max_iters = len(train_dataloader) * args.max_epoch
-    init_lr = args.init_lr
+    init_lr = 2e-6
     optimizer = torch.optim.AdamW(params=pointpillars.parameters(), 
                                   lr=init_lr, 
                                   betas=(0.95, 0.99),
                                   weight_decay=0.01)
-    scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer,  
-                                                    max_lr=init_lr*10, 
-                                                    total_steps=max_iters, 
-                                                    pct_start=0.4, 
-                                                    anneal_strategy='cos',
-                                                    cycle_momentum=True, 
-                                                    base_momentum=0.95*0.895, 
-                                                    max_momentum=0.95,
-                                                    div_factor=10)
+    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer,
+                                                       gamma=0.95,
+                                                       )
+    # scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer,  
+    #                                                 max_lr=init_lr*10, 
+    #                                                 total_steps=max_iters, 
+    #                                                 pct_start=0.4, 
+    #                                                 anneal_strategy='cos',
+    #                                                 cycle_momentum=True, 
+    #                                                 base_momentum=0.95*0.895, 
+    #                                                 max_momentum=0.95,
+    #                                                 div_factor=10)
     saved_logs_path = os.path.join(args.saved_path, 'summary')
     os.makedirs(saved_logs_path, exist_ok=True)
     writer = SummaryWriter(saved_logs_path)
