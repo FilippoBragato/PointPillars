@@ -9,14 +9,27 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Configuration Parameters')
     parser.add_argument('--flip', action="store_true", help='flip the image')
     parser.add_argument('--ckpt_folder', default='./pillar_loggs/checkpoints', help='your checkpoint folder')
+    parser.add_argument('--output_folder', default='./results', help='your output folder')
+    parser.add_argument('--period', default=1, help='period of the checkpoint')
     
     args = parser.parse_args()
 
+    # create output folder if it does not exist
+    if not os.path.exists(args.output_folder):
+        os.makedirs(args.output_folder)
+
     ckpts = glob.glob(os.path.join(args.ckpt_folder, '*.pth'))
+
     for ckpt in ckpts:
+        
         print(ckpt)
         base_name = ckpt.split('/')[-1].split('.')[0]
-        if os.path.isfile(f'./results/{base_name}_val_{str(args.flip)}.txt'):
+        epoch = int(base_name.split('_')[-1])
+
+        out_file = os.path.join(args.output_folder + f'{base_name}_val_{str(args.flip)}.txt')
+        if epoch % int(args.period) != 0:
+            print('Not the right epoch')
+        elif os.path.isfile(out_file):
             print('Already tested')
         else:
             dataset =  SELMADataset(root_path="../data/CV/dataset/",
@@ -30,4 +43,4 @@ if __name__ == "__main__":
                             n_min=5,
                             format_flip=args.flip,
                             )
-            test(dataset, ckpt, False, 6, 16, f'./results/{base_name}_val_{str(args.flip)}.txt')
+            test(dataset, ckpt, False, 6, 16, out_file)
