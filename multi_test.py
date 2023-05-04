@@ -29,7 +29,7 @@ if __name__ == "__main__":
         base_name = ckpt.split('/')[-1].split('.')[0]
         epoch = int(base_name.split('_')[-1])
 
-        out_file = os.path.join(args.output_folder + f'{base_name}_val_{str(args.flip)}.txt')
+        out_file = os.path.join(args.output_folder, f'{base_name}_val_{str(args.flip)}.txt')
         if epoch % int(args.period) != 0:
             print('Not the right epoch')
         elif os.path.isfile(out_file):
