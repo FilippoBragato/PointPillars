@@ -46,4 +46,4 @@ if __name__ == "__main__":
                             n_min=5,
                             format_flip=args.flip,
                             )
-            test(dataset, ckpt, False, 6, 16, out_file)
+            test(dataset, ckpt, False, 6, 24, out_file)
