@@ -14,6 +14,9 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
 
+    point_cloud_range = [0, -40.0, -1, 72.0, 40.0, 3]
+    voxel_size = [0.5, 0.5, 4]
+
     # create output folder if it does not exist
     if not os.path.exists(args.output_folder):
         os.makedirs(args.output_folder)
@@ -21,7 +24,7 @@ if __name__ == "__main__":
     ckpts = glob.glob(os.path.join(args.ckpt_folder, '*.pth'))
 
     for ckpt in ckpts:
-        
+
         print(ckpt)
         base_name = ckpt.split('/')[-1].split('.')[0]
         epoch = int(base_name.split('_')[-1])

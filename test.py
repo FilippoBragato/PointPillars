@@ -21,7 +21,14 @@ def point_range_filter(pts, point_range=[0, -39.68, -3, 69.12, 39.68, 1]):
     return pts 
     
 
-def test(dataset, ckpt, no_cuda, batch_size, num_workers, out_file_path):
+def test(dataset, 
+         ckpt, 
+         no_cuda, 
+         batch_size, 
+         num_workers, 
+         out_file_path, 
+         point_cloud_range=[0, -39.68, -1, 69.12, 39.68, 3], 
+         voxel_size=[0.16, 0.16, 4]):
 
     """ Test the model on a set, save the predictions in a json file
     Args:
@@ -45,10 +52,14 @@ def test(dataset, ckpt, no_cuda, batch_size, num_workers, out_file_path):
                                 shuffle=False)
 
     if not no_cuda:
-        model = PointPillars(nclasses=len(CLASSES)).cuda()
+        model = PointPillars(nclasses=len(CLASSES),
+                             point_cloud_range=point_cloud_range,
+                             voxel_size=voxel_size).cuda()
         model.load_state_dict(torch.load(ckpt))
     else:
-        model = PointPillars(nclasses=len(CLASSES))
+        model = PointPillars(nclasses=len(CLASSES),
+                             point_cloud_range=point_cloud_range,
+                             voxel_size=voxel_size)
         model.load_state_dict(
             torch.load(ckpt, map_location=torch.device('cpu')))
         
@@ -95,7 +106,7 @@ def test(dataset, ckpt, no_cuda, batch_size, num_workers, out_file_path):
                     temp_dict["gt_bboxes"] = data_dict["batched_gt_bboxes"][j].tolist()
                     temp_dict["gt_labels"] = data_dict["batched_labels"][j].tolist()
                     results.append(temp_dict)
-                    
+
     # write results to file as a json format
     with open(out_file_path, 'w') as f:
         f.write("[\n")
