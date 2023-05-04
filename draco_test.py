@@ -10,7 +10,7 @@ if __name__ == "__main__":
     parser.add_argument('--ckpt', default='./pillar_loggs/checkpoints/null.pth', help='your checkpoint folder')
     parser.add_argument('--num_workers', default=6, help='number of workers')
     parser.add_argument('--output_folder', default='./results', help='your output folder')
-    parser.add_argument('--batch_size', default=6, help='batch size')
+    parser.add_argument('--batch_size', default=6, type=int, help='batch size')
 
     args = parser.parse_args()
     
