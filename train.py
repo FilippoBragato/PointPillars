@@ -176,7 +176,6 @@ def main(args):
                 loss.backward()
                 # torch.nn.utils.clip_grad_norm_(pointpillars.parameters(), max_norm=35)
                 optimizer.step()
-                scheduler.step()
 
                 global_step = epoch * len(train_dataloader) + train_step + 1
 
@@ -189,6 +188,7 @@ def main(args):
                 # printing stack trace
                 # traceback.print_exc()
                 pass
+        scheduler.step()
         if (epoch + 1) % args.ckpt_freq_epoch == 0:
             torch.save(pointpillars.state_dict(), os.path.join(saved_ckpt_path, f'epoch_{epoch+1}.pth'))
 
