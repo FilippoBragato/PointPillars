@@ -11,6 +11,7 @@ if __name__ == "__main__":
     parser.add_argument('--ckpt_folder', default='./pillar_loggs/checkpoints', help='your checkpoint folder')
     parser.add_argument('--output_folder', default='./results', help='your output folder')
     parser.add_argument('--period', default=1, help='period of the checkpoint')
+    parser.add_argument('--min_epoch', default=0, help='minimum epoch to test')
     
     args = parser.parse_args()
 
@@ -25,16 +26,16 @@ if __name__ == "__main__":
 
     for ckpt in ckpts:
 
-        print(ckpt)
         base_name = ckpt.split('/')[-1].split('.')[0]
         epoch = int(base_name.split('_')[-1])
 
         out_file = os.path.join(args.output_folder, f'{base_name}_val_{str(args.flip)}.txt')
-        if epoch % int(args.period) != 0:
-            print('Not the right epoch')
+        if epoch % int(args.period) != 0 or epoch < int(args.min_epoch):
+            pass
         elif os.path.isfile(out_file):
-            print('Already tested')
+            pass
         else:
+            print(ckpt)
             dataset =  SELMADataset(root_path="../data/CV/dataset/",
                             splits_path="./dataset/ImageSets/",
                             split='val',
