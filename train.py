@@ -83,13 +83,13 @@ def main(args):
                                     point_cloud_range=point_cloud_range,
                                     voxel_size=voxel_size,
                                     backbone_padding=backbone_padding).cuda()
-        pointpillars.load_state_dict(torch.load("pillar_loggs/checkpoints/epoch_60.pth"))
+        # pointpillars.load_state_dict(torch.load("pillar_loggs/checkpoints/epoch_60.pth"))
     else:
         pointpillars = PointPillars(nclasses=args.nclasses,
                                     point_cloud_range=point_cloud_range,
                                     voxel_size=voxel_size,
                                     backbone_padding=backbone_padding)
-        pointpillars.load_state_dict(torch.load("pillar_loggs/checkpoints/epoch_60.pth"))
+        # pointpillars.load_state_dict(torch.load("pillar_loggs/checkpoints/epoch_60.pth"))
     loss_func = Loss()
 
     max_iters = len(train_dataloader) * args.max_epoch
