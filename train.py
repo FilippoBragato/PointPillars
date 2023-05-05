@@ -24,8 +24,8 @@ def save_summary(writer, loss_dict, global_step, tag, lr=None, momentum=None):
 
 def main(args):
     setup_seed()
-    point_cloud_range = [0, -39.68, -1, 69.12, 39.68, 3]
-    voxel_size = [0.16, 0.16, 4]
+    point_cloud_range = [0, -40.96, -1, 81.92, 40.96, 3]
+    voxel_size = [1.28, 1.28, 4]
     backbone_padding = [1,1,1]
 
     assert (point_cloud_range[3] - point_cloud_range[0]) / voxel_size[0] % 1 == 0
@@ -93,23 +93,20 @@ def main(args):
     loss_func = Loss()
 
     max_iters = len(train_dataloader) * args.max_epoch
-    init_lr = 2e-6
+    init_lr = args.init_lr
     optimizer = torch.optim.AdamW(params=pointpillars.parameters(), 
                                   lr=init_lr, 
                                   betas=(0.95, 0.99),
                                   weight_decay=0.01)
-    scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer,
-                                                       gamma=0.95,
-                                                       )
-    # scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer,  
-    #                                                 max_lr=init_lr*10, 
-    #                                                 total_steps=max_iters, 
-    #                                                 pct_start=0.4, 
-    #                                                 anneal_strategy='cos',
-    #                                                 cycle_momentum=True, 
-    #                                                 base_momentum=0.95*0.895, 
-    #                                                 max_momentum=0.95,
-    #                                                 div_factor=10)
+    scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer,  
+                                                    max_lr=init_lr*10, 
+                                                    total_steps=max_iters, 
+                                                    pct_start=0.4, 
+                                                    anneal_strategy='cos',
+                                                    cycle_momentum=True, 
+                                                    base_momentum=0.95*0.895, 
+                                                    max_momentum=0.95,
+                                                    div_factor=10)
     saved_logs_path = os.path.join(args.saved_path, 'summary')
     os.makedirs(saved_logs_path, exist_ok=True)
     writer = SummaryWriter(saved_logs_path)
@@ -176,6 +173,7 @@ def main(args):
                 loss.backward()
                 # torch.nn.utils.clip_grad_norm_(pointpillars.parameters(), max_norm=35)
                 optimizer.step()
+                scheduler.step()
 
                 global_step = epoch * len(train_dataloader) + train_step + 1
 
@@ -188,7 +186,6 @@ def main(args):
                 # printing stack trace
                 # traceback.print_exc()
                 pass
-        scheduler.step()
         if (epoch + 1) % args.ckpt_freq_epoch == 0:
             torch.save(pointpillars.state_dict(), os.path.join(saved_ckpt_path, f'epoch_{epoch+1}.pth'))
 
