@@ -3,6 +3,7 @@ import os
 import torch
 from tqdm import tqdm
 import pdb
+import numpy as np
 
 from utils import setup_seed
 from dataset import SELMADataset, get_dataloader
@@ -122,6 +123,7 @@ def main(args):
                 for key in data_dict:
                     for j, item in enumerate(data_dict[key]):
                         if torch.is_tensor(item):
+                            print(key, "MIN", np.max(data_dict[key][j].numpy()), "MAX" ,np.max(data_dict[key][j].numpy()))
                             data_dict[key][j] = data_dict[key][j].cuda()
             
             optimizer.zero_grad()
