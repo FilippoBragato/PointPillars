@@ -123,7 +123,7 @@ def main(args):
                 for key in data_dict:
                     for j, item in enumerate(data_dict[key]):
                         if torch.is_tensor(item):
-                            if key == 'batched_pts':
+                            if key == 'batched_labels':
                                 print(key, np.unique(data_dict[key][j].numpy(), return_counts=True))
                             data_dict[key][j] = data_dict[key][j].cuda()
             
