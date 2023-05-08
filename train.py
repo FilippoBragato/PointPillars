@@ -26,7 +26,7 @@ def save_summary(writer, loss_dict, global_step, tag, lr=None, momentum=None):
 def main(args):
     setup_seed()
     point_cloud_range = [0, -40.96, -1, 81.92, 40.96, 3]
-    voxel_size = [2.56, 2.56, 4]
+    voxel_size = [0.16, 0.16, 4]
     backbone_padding = [1,1,1]
 
     assert (point_cloud_range[3] - point_cloud_range[0]) / voxel_size[0] % 1 == 0
@@ -274,7 +274,7 @@ if __name__ == '__main__':
     parser.add_argument('--num_workers', type=int, default=16)
     parser.add_argument('--nclasses', type=int, default=3)
     parser.add_argument('--init_lr', type=float, default=0.00025)
-    parser.add_argument('--max_epoch', type=int, default=60)
+    parser.add_argument('--max_epoch', type=int, default=120)
     parser.add_argument('--log_freq', type=int, default=8)
     parser.add_argument('--ckpt_freq_epoch', type=int, default=1)
     parser.add_argument('--no_cuda', action='store_true',
