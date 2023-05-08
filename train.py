@@ -25,7 +25,7 @@ def save_summary(writer, loss_dict, global_step, tag, lr=None, momentum=None):
 def main(args):
     setup_seed()
     point_cloud_range = [0, -40.96, -1, 81.92, 40.96, 3]
-    voxel_size = [1.28, 1.28, 4]
+    voxel_size = [2.56, 2.56, 4]
     backbone_padding = [1,1,1]
 
     assert (point_cloud_range[3] - point_cloud_range[0]) / voxel_size[0] % 1 == 0
