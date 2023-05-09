@@ -11,6 +11,7 @@ if __name__ == "__main__":
     parser.add_argument('--num_workers', default=6, help='number of workers')
     parser.add_argument('--output_folder', default='./results', help='your output folder')
     parser.add_argument('--batch_size', default=6, type=int, help='batch size')
+    parser.add_argument('--voxel_size', default=0.16, type=float, help='voxel size')
 
     args = parser.parse_args()
     
@@ -19,9 +20,9 @@ if __name__ == "__main__":
         os.makedirs(args.output_folder)
 
     point_cloud_range = [0, -40.0, -1, 72.0, 40.0, 3]
-    voxel_size = [0.5, 0.5, 4]
+    voxel_size = [args.voxel_size, args.voxel_size, 4]
 
-    compression_levels = [0]
+    compression_levels = [0, 5, 10]
     quantization_levels = [7, 9, 6, 8, 10, 5, 11]
 
     for compression_level in compression_levels:
