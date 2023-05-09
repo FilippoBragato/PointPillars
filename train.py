@@ -117,6 +117,7 @@ def main(args):
         checkpoints = os.listdir(saved_ckpt_path)
         checkpoints = [int(checkpoint.split('.')[0].split('_')[1]) for checkpoint in checkpoints]
         last_epoch = max(checkpoints)
+        starting_epoch = last_epoch + 1
         pointpillars.load_state_dict(torch.load(os.path.join(saved_ckpt_path, f'epoch_{last_epoch}.pth')))
         already_trained_steps = last_epoch * (len(train_dataloader)//args.batch_size)
         already_trained_steps_valid = (last_epoch // 2) * (len(val_dataloader)//args.batch_size)
@@ -126,8 +127,9 @@ def main(args):
         print(f"Resuming training from epoch {last_epoch}")
     else:
         writer = SummaryWriter(saved_logs_path)
+        starting_epoch = 0
 
-    for epoch in range(args.max_epoch):
+    for epoch in range(starting_epoch, args.max_epoch):
         print('=' * 20, epoch, '=' * 20)
         train_step, val_step = 0, 0
         for i, data_dict in enumerate(tqdm(train_dataloader)):
