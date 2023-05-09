@@ -99,15 +99,6 @@ def main(args):
                                   lr=init_lr, 
                                   betas=(0.95, 0.99),
                                   weight_decay=0.01)
-    scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer,  
-                                                    max_lr=init_lr*10, 
-                                                    total_steps=max_iters, 
-                                                    pct_start=0.4, 
-                                                    anneal_strategy='cos',
-                                                    cycle_momentum=True, 
-                                                    base_momentum=0.95*0.895, 
-                                                    max_momentum=0.95,
-                                                    div_factor=10)
     saved_logs_path = os.path.join(args.saved_path, 'summary')
     os.makedirs(saved_logs_path, exist_ok=True)
     saved_ckpt_path = os.path.join(args.saved_path, 'checkpoints')
@@ -122,13 +113,31 @@ def main(args):
         already_trained_steps = last_epoch * (len(train_dataloader))
         already_trained_steps_valid = (last_epoch // 2) * (len(val_dataloader))
         writer = SummaryWriter(saved_logs_path, purge_step=already_trained_steps + already_trained_steps_valid)
-        for _ in range(already_trained_steps):
-            scheduler.step()
+        scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer,  
+                                                        max_lr=init_lr*10, 
+                                                        epochs=args.max_epoch,
+                                                        last_epoch=already_trained_steps,
+                                                        total_steps=max_iters, 
+                                                        pct_start=0.4, 
+                                                        anneal_strategy='cos',
+                                                        cycle_momentum=True, 
+                                                        base_momentum=0.95*0.895, 
+                                                        max_momentum=0.95,
+                                                        div_factor=10)
         print(f"Resuming training from epoch {last_epoch}")
     else:
         writer = SummaryWriter(saved_logs_path)
         starting_epoch = 0
-
+        scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer,  
+                                                        max_lr=init_lr*10, 
+                                                        epochs=args.max_epoch,
+                                                        total_steps=max_iters, 
+                                                        pct_start=0.4, 
+                                                        anneal_strategy='cos',
+                                                        cycle_momentum=True, 
+                                                        base_momentum=0.95*0.895, 
+                                                        max_momentum=0.95,
+                                                        div_factor=10)
     for epoch in range(starting_epoch, args.max_epoch):
         print('=' * 20, epoch, '=' * 20)
         train_step, val_step = 0, 0
