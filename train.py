@@ -119,8 +119,8 @@ def main(args):
         last_epoch = max(checkpoints)
         starting_epoch = last_epoch + 1
         pointpillars.load_state_dict(torch.load(os.path.join(saved_ckpt_path, f'epoch_{last_epoch}.pth')))
-        already_trained_steps = last_epoch * (len(train_dataloader)//args.batch_size)
-        already_trained_steps_valid = (last_epoch // 2) * (len(val_dataloader)//args.batch_size)
+        already_trained_steps = last_epoch * (len(train_dataloader))
+        already_trained_steps_valid = (last_epoch // 2) * (len(val_dataloader))
         writer = SummaryWriter(saved_logs_path, purge_step=already_trained_steps + already_trained_steps_valid)
         for _ in range(already_trained_steps):
             scheduler.step()
