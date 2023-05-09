@@ -29,9 +29,9 @@ def main(args):
     voxel_size = [args.voxel_size, args.voxel_size, 4]
     backbone_padding = [1,1,1]
 
-    assert (point_cloud_range[3] - point_cloud_range[0]) / voxel_size[0] % 16 == 0
-    assert (point_cloud_range[4] - point_cloud_range[1]) / voxel_size[1] % 16 == 0
-    assert (point_cloud_range[5] - point_cloud_range[2]) / voxel_size[2] % 16 == 0
+    assert ((point_cloud_range[3] - point_cloud_range[0]) / voxel_size[0]) % 16 == 0
+    assert ((point_cloud_range[4] - point_cloud_range[1]) / voxel_size[1]) % 16 == 0
+    assert ((point_cloud_range[5] - point_cloud_range[2]) / voxel_size[2]) % 1 == 0
 
     data_aug = dict(object_noise=dict(
                         num_try=100,
