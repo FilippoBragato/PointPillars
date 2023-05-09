@@ -95,10 +95,6 @@ def main(args):
 
     max_iters = len(train_dataloader) * args.max_epoch
     init_lr = args.init_lr
-    optimizer = torch.optim.AdamW(params=pointpillars.parameters(), 
-                                  lr=init_lr, 
-                                  betas=(0.95, 0.99),
-                                  weight_decay=0.01)
     saved_logs_path = os.path.join(args.saved_path, 'summary')
     os.makedirs(saved_logs_path, exist_ok=True)
     saved_ckpt_path = os.path.join(args.saved_path, 'checkpoints')
@@ -113,6 +109,9 @@ def main(args):
         already_trained_steps = last_epoch * (len(train_dataloader))
         already_trained_steps_valid = (last_epoch // 2) * (len(val_dataloader))
         writer = SummaryWriter(saved_logs_path, purge_step=already_trained_steps + already_trained_steps_valid)
+        optimizer = torch.optim.AdamW(params=pointpillars.parameters(), 
+                                    betas=(0.95, 0.99),
+                                    weight_decay=0.01)
         scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer,  
                                                         max_lr=init_lr*10, 
                                                         epochs=args.max_epoch,
@@ -128,6 +127,11 @@ def main(args):
     else:
         writer = SummaryWriter(saved_logs_path)
         starting_epoch = 0
+
+        optimizer = torch.optim.AdamW(params=pointpillars.parameters(), 
+                                  lr=init_lr, 
+                                  betas=(0.95, 0.99),
+                                  weight_decay=0.01)
         scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer,  
                                                         max_lr=init_lr*10, 
                                                         epochs=args.max_epoch,
