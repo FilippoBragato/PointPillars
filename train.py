@@ -26,12 +26,12 @@ def save_summary(writer, loss_dict, global_step, tag, lr=None, momentum=None):
 def main(args):
     setup_seed()
     point_cloud_range = [0, -40.96, -1, 81.92, 40.96, 3]
-    voxel_size = [0.16, 0.16, 4]
+    voxel_size = [args.voxel_size, args.voxel_size, 4]
     backbone_padding = [1,1,1]
 
-    assert (point_cloud_range[3] - point_cloud_range[0]) / voxel_size[0] % 1 == 0
-    assert (point_cloud_range[4] - point_cloud_range[1]) / voxel_size[1] % 1 == 0
-    assert (point_cloud_range[5] - point_cloud_range[2]) / voxel_size[2] % 1 == 0
+    assert (point_cloud_range[3] - point_cloud_range[0]) / voxel_size[0] % 16 == 0
+    assert (point_cloud_range[4] - point_cloud_range[1]) / voxel_size[1] % 16 == 0
+    assert (point_cloud_range[5] - point_cloud_range[2]) / voxel_size[2] % 16 == 0
 
     data_aug = dict(object_noise=dict(
                         num_try=100,
@@ -110,9 +110,22 @@ def main(args):
                                                     div_factor=10)
     saved_logs_path = os.path.join(args.saved_path, 'summary')
     os.makedirs(saved_logs_path, exist_ok=True)
-    writer = SummaryWriter(saved_logs_path)
     saved_ckpt_path = os.path.join(args.saved_path, 'checkpoints')
     os.makedirs(saved_ckpt_path, exist_ok=True)
+
+    if args.resume:
+        checkpoints = os.listdir(saved_ckpt_path)
+        checkpoints = [int(checkpoint.split('.')[0].split('_')[1]) for checkpoint in checkpoints]
+        last_epoch = max(checkpoints)
+        pointpillars.load_state_dict(torch.load(os.path.join(saved_ckpt_path, f'epoch_{last_epoch}.pth')))
+        already_trained_steps = last_epoch * (len(train_dataloader)//args.batch_size)
+        already_trained_steps_valid = (last_epoch // 2) * (len(val_dataloader)//args.batch_size)
+        writer = SummaryWriter(saved_logs_path, purge_step=already_trained_steps + already_trained_steps_valid)
+        for _ in range(already_trained_steps):
+            scheduler.step()
+        print(f"Resuming training from epoch {last_epoch}")
+    else:
+        writer = SummaryWriter(saved_logs_path)
 
     for epoch in range(args.max_epoch):
         print('=' * 20, epoch, '=' * 20)
@@ -280,6 +293,9 @@ if __name__ == '__main__':
                         help='whether to use cuda')
     parser.add_argument('--profile', action='store_true',
                         help='whether to profile the training')
+    parser.add_argument('--resume', action='store_true',
+                        help='whether to resume training')
+    parser.add_argument('--voxel_size', type=float, default=0.16)
     args = parser.parse_args()
 
     if args.profile:
