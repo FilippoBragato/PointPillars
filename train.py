@@ -110,8 +110,10 @@ def main(args):
         already_trained_steps_valid = (last_epoch // 2) * (len(val_dataloader))
         writer = SummaryWriter(saved_logs_path, purge_step=already_trained_steps + already_trained_steps_valid)
         optimizer = torch.optim.AdamW(params=pointpillars.parameters(), 
-                                    betas=(0.95, 0.99),
-                                    weight_decay=0.01)
+                                      lr=init_lr, 
+                                      betas=(0.95, 0.99),
+                                      weight_decay=0.01)
+        optimizer.load_state_dict(torch.load(os.path.join(saved_ckpt_path, f'optimizer_{last_epoch}.pth')))
         scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer,  
                                                         max_lr=init_lr*10, 
                                                         epochs=args.max_epoch,
@@ -217,6 +219,7 @@ def main(args):
                 pass
         if (epoch + 1) % args.ckpt_freq_epoch == 0:
             torch.save(pointpillars.state_dict(), os.path.join(saved_ckpt_path, f'epoch_{epoch+1}.pth'))
+            torch.save(optimizer.state_dict(), os.path.join(saved_ckpt_path, f'optimizer_{epoch+1}.pth'))
 
         if epoch % 2 == 0:
             continue
