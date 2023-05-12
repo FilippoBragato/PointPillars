@@ -23,7 +23,7 @@ if __name__ == "__main__":
     if not os.path.exists(args.output_folder):
         os.makedirs(args.output_folder)
 
-    ckpts = glob.glob(os.path.join(args.ckpt_folder, '*.pth'))
+    ckpts = glob.glob(os.path.join(args.ckpt_folder, 'epoch*.pth'))
 
     for ckpt in ckpts:
 
