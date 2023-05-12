@@ -19,7 +19,7 @@ if __name__ == "__main__":
     if not os.path.exists(args.output_folder):
         os.makedirs(args.output_folder)
 
-    point_cloud_range = [0, -40.0, -1, 72.0, 40.0, 3]
+    point_cloud_range = [0, -40.96, -1, 81.92, 40.96, 3]
     voxel_size = [args.voxel_size, args.voxel_size, 4]
 
     compression_levels = [0, 5, 10]

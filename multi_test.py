@@ -12,11 +12,12 @@ if __name__ == "__main__":
     parser.add_argument('--output_folder', default='./results', help='your output folder')
     parser.add_argument('--period', default=1, help='period of the checkpoint')
     parser.add_argument('--min_epoch', default=0, help='minimum epoch to test')
+    parser.add_argument('--voxel_size', default=0.16, type=float, help='voxel size')
     
     args = parser.parse_args()
 
-    point_cloud_range = [0, -40.0, -1, 72.0, 40.0, 3]
-    voxel_size = [0.5, 0.5, 4]
+    point_cloud_range = [0, -40.96, -1, 81.92, 40.96, 3]
+    voxel_size = [args.voxel_size, args.voxel_size, 4]
 
     # create output folder if it does not exist
     if not os.path.exists(args.output_folder):
