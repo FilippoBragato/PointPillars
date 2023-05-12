@@ -74,6 +74,6 @@ if __name__ == "__main__":
          False, 
          args.batch_size, 
          int(args.num_workers), 
-         os.path.join(args.output_folder,f'./results/test_{str(args.flip)}.txt'),
+         os.path.join(args.output_folder,f'/test_{str(args.flip)}.txt'),
          point_cloud_range=point_cloud_range,
          voxel_size=voxel_size)
