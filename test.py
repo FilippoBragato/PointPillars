@@ -143,14 +143,14 @@ if __name__ == '__main__':
     voxel_size = [args.voxel_size, args.voxel_size, 4]
 
     base_name = os.path.basename(args.ckpt).split('.')[0]
-    out_file = os.path.join(args.output_folder, f'{base_name}_{args.split}_{str(args.flip)}.txt')
+    out_file = os.path.join(args.out_folder, f'{base_name}_{args.split}_{str(args.flip)}.txt')
     if os.path.isfile(out_file):
         pass
     else:
         print(out_file)
         dataset =  SELMADataset(root_path="../data/CV/dataset/",
                         splits_path="./dataset/ImageSets/",
-                        split='val',
+                        split=args.split,
                         split_extension="txt",
                         augment_data=False,
                         sensors=['lidar', 'bbox'],
