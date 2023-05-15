@@ -4,6 +4,7 @@ from dataset import SELMADataset, get_dataloader
 from model import PointPillars
 from tqdm import tqdm
 import numpy as np
+import os
 
 def point_range_filter(pts, point_range=[0, -39.68, -3, 69.12, 39.68, 1]):
     '''
@@ -27,7 +28,7 @@ def test(dataset,
          batch_size, 
          num_workers, 
          out_file_path, 
-         point_cloud_range=[0, -39.68, -1, 69.12, 39.68, 3], 
+         point_cloud_range=[0, -40.96, -1, 81.92, 40.96, 3], 
          voxel_size=[0.16, 0.16, 4]):
 
     """ Test the model on a set, save the predictions in a json file
@@ -130,7 +131,44 @@ if __name__ == '__main__':
     parser.add_argument('--split', default='val', help='the split you want to analize')
     parser.add_argument('--batch_size', type=int, default=6)
     parser.add_argument('--num_workers', type=int, default=16)
-    
+    parser.add_argument('--out_folder', type=str, default='results')
+    parser.add_argument('--voxel_size', type=float, default=0.16)
+    parser.add_argument('--draco', action='store_true', help='whether to use draco compression')
+    parser.add_argument('--draco_quantization_bits', type=int, default=14, help='draco quantization bits')
+    parser.add_argument('--draco_compression_level', type=int, default=0, help='draco compression level')
+
     args = parser.parse_args()
 
-    test(args.split, args.ckpt, args.flip, args.no_cuda, args.batch_size, args.num_workers)
+    point_cloud_range = [0, -40.96, -1, 81.92, 40.96, 3]
+    voxel_size = [args.voxel_size, args.voxel_size, 4]
+
+    base_name = os.path.basename(args.ckpt).split('.')[0]
+    out_file = os.path.join(args.output_folder, f'{base_name}_{args.split}_{str(args.flip)}.txt')
+    if os.path.isfile(out_file):
+        pass
+    else:
+        print(out_file)
+        dataset =  SELMADataset(root_path="../data/CV/dataset/",
+                        splits_path="./dataset/ImageSets/",
+                        split='val',
+                        split_extension="txt",
+                        augment_data=False,
+                        sensors=['lidar', 'bbox'],
+                        sensor_positions=['T'],
+                        bbox_location="../data/corrected_bbox/",
+                        n_min=5,
+                        format_flip=args.flip,
+                        point_cloud_range=point_cloud_range,
+                        voxel_size=voxel_size,
+                        draco_compression=args.draco,
+                        draco_quantization_bits=args.draco_quantization_bits,
+                        draco_compression_level=args.draco_compression_level
+                        )
+        test(dataset, 
+             args.ckpt, 
+             False, 
+             args.batch_size, 
+             args.num_workers, 
+             out_file, 
+             point_cloud_range=point_cloud_range, 
+             voxel_size=voxel_size)
