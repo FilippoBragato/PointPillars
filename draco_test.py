@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     point_cloud_range = [0, -40.96, -1, 81.92, 40.96, 3]
     if args.voxel_size == 0.50:
-        point_cloud_range [0, -40.0, -1, 72.0, 40.0, 3]
+        point_cloud_range = [0, -40.0, -1, 72.0, 40.0, 3]
     voxel_size = [args.voxel_size, args.voxel_size, 4]
 
     compression_levels = [0,1,2,3,4,5,6,7,8,9,10]
