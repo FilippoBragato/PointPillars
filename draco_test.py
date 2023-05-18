@@ -23,7 +23,7 @@ if __name__ == "__main__":
     voxel_size = [args.voxel_size, args.voxel_size, 4]
 
     compression_levels = [0, 5, 10]
-    quantization_levels = [7, 9, 6, 8, 10, 5, 11]
+    quantization_levels = [9, 10, 11, 12]
 
     for compression_level in compression_levels:
         for quantization_level in quantization_levels:
